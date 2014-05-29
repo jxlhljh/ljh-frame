@@ -26,7 +26,7 @@ var storeOper = new Ext.data.JsonStore({
 	totalProperty: 'totalCount',
 	pruneModifiedRecords:true,//设置为true,则每次当store装载或有record被移除时,清空所有修改了的record信息. 默认为false. 
 	fields: [ 'id','auth','operationcode','operationname','functionid'],
-	url: fullpath+'/sysRoleOperationController.do?operationRoleQuery',
+	url: fullpath+'/sysRoleOperationController.do?queryRoleOperation',
 	remoteSort:true,
 	listeners : {   
         'load' : function() {   
@@ -291,14 +291,6 @@ Ext.onReady(function(){
 					zonetreeroot.reload();
 					userZoneTreePanel.expandAll();  
 					zonetreewin.show();
-					
-					/*powertreeLoder.dataUrl=rootPath+'/sendisystem/generateRoleZonePowerTree.do';
-					powertreeroot.setText('区域信息');
-					powertreewin.setTitle('区域权限关联树');
-					hostormodule='h';
-					powertreeroot.reload();
-					powertreePanel.expandAll();
-				    powertreewin.show();   */
         },
         pressed: true
      }/*{
@@ -330,7 +322,6 @@ Ext.onReady(function(){
      },'-','角色名','-',rolenamefile,*/
     	 ]
     });
- 
     
     
     var grid=new Ext.grid.GridPanel({
@@ -409,10 +400,8 @@ Ext.onReady(function(){
 	 grid.render();
 	 store.load({params:{start:0, limit:25}});
  	      ////////service form 
- 
-    
- 
 
+	 
 	   var addform={
 	   	            usepurse:'addform', //用途,默认情况下是添加，也可以是modifyform
                     id:'addform',
@@ -550,79 +539,76 @@ Ext.onReady(function(){
 	 
     
      var msForm= new Ext.FormPanel({
-	   	            id:'joinuserform',
-                    xtype:'form',
-                    url:rootPath+'/sendisystem/addUserToUserrole.do',
-                   layout:"column",
-                   baseCls:"x-plain",
-                   style:"padding:5px",
-                   items:[
-                    
-        					 		 {
-							            xtype:"itemselector",
-							            name:"itemselector",
-							            //fieldLabel:"ItemSelector",
-							            hideLabel:true,
-							            dataFields:["userid", "username"],
-							            toData:[],
-							            msWidth:250,
-							            msHeight:230,
-							            valueField:"userid",
-							            displayField:"username",
-							            imagePath:rootPath+"/page/common/MultiSelect/images/",
-							            toLegend:"已选用户",
-							            fromLegend:"可选用户",
-							            fromStore:fromuserStore,
-							            toStore:touserStore,
-							            toTBar:[{
-							                text:"清除所选",
-							                handler:function(){
-							                    var i=msForm.getForm().findField("itemselector");
-							                    i.reset.call(i);
-							                }
-							            }],
-							            fromTBar:[ '用户名',
-							            {
-							              xtype:'textfield',
-							              name:'username',id:'username',
-							              enableKeyEvents:true, 
-							              listeners :{
-							              'keyup':function()
-							              {
-							                fromuserStore.reload({params:{start:0, limit:1000,querytype:'querynoselectuser',useroleid:useroleid,username:this.getValue()}});
-							        
-							              }
-							             } 
-							             }
-							             
-							            ]
-							        },
-							         {
-					                    xtype:'hidden',
-					                    name: 'useroleid',id:'useroleid'
-					                 }
-                ]
-                
-                });
-	   
+   	       id:'joinuserform',
+           xtype:'form',
+           url:rootPath+'/sendisystem/addUserToUserrole.do',
+           layout:"column",
+           baseCls:"x-plain",
+           style:"padding:5px",
+           items:[
+		 		 {
+		            xtype:"itemselector",
+		            name:"itemselector",
+		            //fieldLabel:"ItemSelector",
+		            hideLabel:true,
+		            dataFields:["userid", "username"],
+		            toData:[],
+		            msWidth:250,
+		            msHeight:230,
+		            valueField:"userid",
+		            displayField:"username",
+		            imagePath:rootPath+"/page/common/MultiSelect/images/",
+		            toLegend:"已选用户",
+		            fromLegend:"可选用户",
+		            fromStore:fromuserStore,
+		            toStore:touserStore,
+		            toTBar:[{
+		                text:"清除所选",
+		                handler:function(){
+		                    var i=msForm.getForm().findField("itemselector");
+		                    i.reset.call(i);
+		                }
+		            }],
+		            fromTBar:[ '用户名',
+		            {
+		              xtype:'textfield',
+		              name:'username',id:'username',
+		              enableKeyEvents:true, 
+		              listeners :{
+		              'keyup':function()
+		              {
+		                fromuserStore.reload({params:{start:0, limit:1000,querytype:'querynoselectuser',useroleid:useroleid,username:this.getValue()}});
+		        
+		              }
+		             } 
+		             }
+		             
+		            ]
+		        },
+		         {
+                    xtype:'hidden',
+                    name: 'useroleid',id:'useroleid'
+                 }
+        	]
+        });
     
     ////
     
     	   
 	 var conjoinuserwin=new Ext.Window({
-                     title:"角色关联用户",
-				     bodyStyle:'padding:5px',
-				     layout : 'fit',
-				     closeAction :'hide',
-				 	 plain: true,
-			         frame: true,
-			         id:'conjoinuserwin',
-			         width: 550,
-				     height:340,
-				     layout:"form",
-                     labelWidth:55,
-                    items:[msForm],
-                  showlock:false,
+	             title:"角色关联用户",
+			     bodyStyle:'padding:5px',
+			     layout : 'fit',
+			     closeAction :'hide',
+			 	 plain: true,
+		         frame: true,
+		         id:'conjoinuserwin',
+		         width: 550,
+			     height:340,
+			     layout:"form",
+	             labelWidth:55,
+	            items:[msForm],
+	            showlock:false,
                 buttons:[
                 {
                  text:"确定",
@@ -631,21 +617,20 @@ Ext.onReady(function(){
                   if(  Ext.getCmp('joinuserform').getForm().isValid())
                   {
                   	   Ext.getCmp('joinuserform').getForm().submit({
-                  						 
-		                 		  		   waitTitle:"等待中.....",
-		                 		 		   waitMsg:"正在提交数据，请稍.....",
-		                 		 		   failure:function()
-		                 		 		   {
-		                 		 		   		  Ext.Msg.alert('信息', ' 操作失败，请检查服务器!');   
-		                 		 		   		  conjoinuserwin.hide();
-		                 		 		   },
-		                 		 		   success:function(_form,_action)
-		                 		 		   {
-		                 		 		   	    Ext.Msg.alert('信息', '操作成功!');
-		                 		 		   	   conjoinuserwin.hide();
-		                 		 		   	   
-		                 		 	 	   }
-		                 	 	 		 });
+                  		   
+             		  		   waitTitle:"等待中.....",
+             		 		   waitMsg:"正在提交数据，请稍.....",
+             		 		   failure:function()
+             		 		   {
+             		 		   		  Ext.Msg.alert('信息', ' 操作失败，请检查服务器!');   
+             		 		   		  conjoinuserwin.hide();
+             		 		   },
+             		 		   success:function(_form,_action)
+             		 		   {
+             		 		   	    Ext.Msg.alert('信息', '操作成功!');
+             		 		   	   conjoinuserwin.hide();
+             		 	 	   }
+             	 	 		 });
                   }
                
                 }
@@ -672,18 +657,47 @@ Ext.onReady(function(){
              uiProviders:{'col':Ext.ux.TreeCheckNodeUI}
         });
         
-       var 	powertreeroot=new Ext.tree.AsyncTreeNode({
-         text:'模块信息',
-		 id:-1
-         });
-         powertreeLoder.on("beforeload", function(treeLoader, node) {
-         powertreeLoder.baseParams.Treeid=node.id;
-        powertreeLoder.baseParams.useroleid=useroleid;
-    },powertreeLoder);   
+      var powertreeroot=new Ext.tree.AsyncTreeNode({
+	         text:'模块信息',
+			 id:-1
+	         });
+	         powertreeLoder.on("beforeload", function(treeLoader, node) {
+	         powertreeLoder.baseParams.Treeid=node.id;
+	        powertreeLoder.baseParams.useroleid=useroleid;
+	  },powertreeLoder);   
  
        
-
-	var  powertreePanel=new Ext.tree.TreePanel({
+	var tbar_powertreePanel = new Ext.Toolbar({
+	    scope:this,
+	    height:25,
+	    items:[ {
+		    	text:'保存模块权限',
+		    	pressed: true,
+		    	handler:function(){
+            		powerstring="";
+            		if(hostormodule=='m'){
+                    	saveurl=rootPath+'/sysPowerController.do?saveSyspower';
+                    }
+                    else{
+            			saveurl=rootPath+'/sysPowerController.do?saveSysHostpower';
+            		}
+          			IteratorTreeNodes(powertreeroot);
+       				Ext.Ajax.request({
+		    			url:saveurl,
+		    			success:function(_response,_options){
+			     			Ext.Msg.alert('信息','操作成功');
+				     			powertreewin.hide();
+ 							},
+				   			failure: function(){ 
+				     			Ext.Msg.alert('信息','操作失败');
+			    		},
+		   				params: {powerstring: powerstring,useroleid:useroleid}
+					});
+        		}
+			}
+		]
+	});
+	var powertreePanel=new Ext.tree.TreePanel({
 		id: 'tree-panel',
         height: 250,
         width:300,
@@ -695,20 +709,21 @@ Ext.onReady(function(){
         useArrows: true,
         loader:powertreeLoder,
         root: powertreeroot,
+	   	tbar:tbar_powertreePanel,
         listeners : {  //点击节点，右边panel显示模块的按钮内容
         	'click':function(node,e){
 				functionid = node.attributes.id;//alert(functionid+"  "+useroleid);
-				opergrid.setTitle(node.attributes.text+'按钮权限设置');
+				opergrid.setTitle('('+node.attributes.text+')按钮权限设置');
 				storeOper.load({params:{functionid: functionid,useroleid:useroleid}});
 	 		}  
     	}  
 	});
  
-    var theadbar = new Ext.Toolbar({
+    var tbar_opergrid = new Ext.Toolbar({
 	    scope:this,
 	    height:25,
 	    items:[ {
-		    	text:'保存',
+		    	text:'保存按钮权限',
 		    	pressed: true,
 				handler:function(){
 	    			if(functionid=="") {Ext.Msg.alert('信息','未选择模块');return;}
@@ -728,7 +743,7 @@ Ext.onReady(function(){
 				    }
 				    //alert(operationCodes+"_"+functionid+"_"+useroleid);
 			    	Ext.Ajax.request({
-				    	url:fullpath+'/operation_set/OperationRoleSetAction!operationRoleSet.do',
+				    	url:fullpath+'/sysRoleOperationController.do?saveRoleOperation',
 				    	success:function(_response,_options){
 				        	Ext.Msg.alert('信息','按钮权限设置成功');
 								storeOper.load({params:{functionid: functionid,useroleid:useroleid}});
@@ -752,7 +767,7 @@ Ext.onReady(function(){
 	    trackMouseOver:false,
 	    loadMask: {msg:'正加载数据...'},
 	    forceFit:false ,
-	   	tbar:theadbar
+	   	tbar:tbar_opergrid
 	});
          
           var powertreewin=new Ext.Window({
@@ -771,37 +786,7 @@ Ext.onReady(function(){
 		    	   	region:'center',
 		    	   	layout:'fit',
 		         	width: 390,
-	    	  	   	items:[powertreePanel],
-	    	  	   	buttons:[{
-                 		text:"确定",
-                		handler:function(){
-                    		powerstring="";
-                    		if(hostormodule=='m'){
-		                    	saveurl=rootPath+'/sysPowerController.do?saveSyspower';
-		                    }
-		                    else{
-                    			saveurl=rootPath+'/sysPowerController.do?saveSysHostpower';
-                    		}
-                  			IteratorTreeNodes(powertreeroot);
-               				Ext.Ajax.request({
-				    			url:saveurl,
-				    			success:function(_response,_options){
-					     			Ext.Msg.alert('信息','操作成功');
-					     			powertreewin.hide();
-	 							},
-					   			failure: function(){ 
-					     			Ext.Msg.alert('信息','操作失败');
-					    		},
-				   				params: {powerstring: powerstring,useroleid:useroleid}
-							});
-                		}
-                	},{
-                	 	text:"关闭",
-                 		handler:function(){	
-                			storeOper.removeAll();
-                			powertreewin.hide();
-                		}
-                	}]
+	    	  	   	items:[powertreePanel]
 				},{
 		    	  	xtype:'panel',
 		    	   	region:'east',
@@ -814,11 +799,11 @@ Ext.onReady(function(){
             
             
             var zonetreeLoder=	new Ext.tree.TreeLoader({
-           		 url:fullpath+'/systemextend/UserZoneAction!generateRoleZonePowerTree.do',
+           		 url:fullpath+'/userZoneController.do?generateRoleZonePowerTree',
             	 uiProviders:{'col':Ext.ux.TreeCheckNodeUI}
 		        });
 		        
-		       var 	zonetreeroot=new Ext.tree.AsyncTreeNode({
+		    var zonetreeroot=new Ext.tree.AsyncTreeNode({
 		         text:'全国',
 				 id:'-1',
 				 icon:fullpath+'/icons/home_page_icon/home.gif'
@@ -862,7 +847,7 @@ Ext.onReady(function(){
 			                 		IteratorTreeNodes(zonetreeroot);
 			                 		//alert(powerstring+"**"+useroleid);
 			           				Ext.Ajax.request({
-						    			url:fullpath+'/systemextend/UserZoneAction!saveUserZonePower.do',
+						    			url:fullpath+'/userZoneController.do?saveUserZonePower',
 						    			success:function(_response,_options){
 							     			Ext.Msg.alert('信息','操作成功');
 							     			zonetreewin.hide();

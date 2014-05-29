@@ -22,7 +22,7 @@ Ext.onReady(function(){
 	var tree_store = Ext.create('Ext.data.TreeStore', {
         proxy: {
             type: 'ajax',
-            url:fullpath+'/systemextend/UserZoneAction!listUserZoneTree.do'
+            url:fullpath+'/userZoneController.do?listUserZoneTree'
         },
         root: {
             text:'全国',
@@ -66,7 +66,7 @@ Ext.onReady(function(){
 			pageSize : pageSize,
 			proxy : {
 				type : 'ajax',
-				url : fullpath+'/systemextend/UserZoneAction!listUserZoneGridData.do',
+				url : fullpath+'/userZoneController.do?queryUserZone',
 				reader : {
 					root : 'data',
 					totalProperty : 'totalCount'
@@ -75,7 +75,7 @@ Ext.onReady(function(){
 	});
 	
 	grid_store.on('beforeload',function(store,options){
-		var new_params1 = {zonecode:clickUserZoneCode,zonename:Ext.getCmp("keyword2").getValue()};
+		var new_params1 = {parentcode:clickUserZoneCode,zonename:Ext.getCmp("keyword2").getValue()};
 		Ext.apply(grid_store.proxy.extraParams, new_params1);
 	})
 	
@@ -119,7 +119,7 @@ Ext.onReady(function(){
 			        },
 			        proxy: {   
 			            type: 'ajax',   
-			            url: fullpath+'/systemextend/UserZoneAction!listUserZoneTree4combo.do'
+			            url: fullpath+'/userZoneController.do?listUserZoneTree4combo'
 			        }
 	    		})
             }
@@ -160,7 +160,7 @@ Ext.onReady(function(){
 //	                        leaf:action.result.leaf
 //	                    }) ;
 						tree_store.load({params : {zonecode : -1}});
-						Ext.getCmp("parentcode_store").store.load({params:{zonecode:-1}});
+						Ext.getCmp("parentcode").store.load({params:{zonecode:-1}});
 	                }
 	         	});
             }
@@ -181,7 +181,7 @@ Ext.onReady(function(){
 				basicform.reset();
 				addwin.setTitle("增加区域信息");
 				addwin.show();
-				basicform.url= fullpath+'/systemextend/UserZoneAction!insertUserZone.do';
+				basicform.url= fullpath+'/userZoneController.do?addUserZone';
 			}
 		}));
 		topBar.add({xtype:'tbseparator'});
@@ -203,7 +203,7 @@ Ext.onReady(function(){
 				addwin.show();
 				var basicform = Ext.getCmp('addform').getForm();
 			  	basicform.loadRecord(selec_record[0]);
-			 	basicform.url = fullpath+'/systemextend/UserZoneAction!updateUserZone.do';
+			 	basicform.url = fullpath+'/userZoneController.do?updateUserZone';
 			}
 		}));
 		topBar.add({xtype:'tbseparator'});
@@ -219,24 +219,28 @@ Ext.onReady(function(){
 				    return;
 				}
 				Ext.MessageBox.confirm("确认删除","将删除所勾选的节点及其子节点，请点击按钮作出选择",function(btn){  
+					alert(1);
 					if(btn=="yes"){ 
+					    alert(12);
 						var selec_record=_sm.getSelection();
 					    var len=selec_record.length;
 					    var id="";
 					    for(var leni=0;leni<len;leni++){
 					    	var tmpNode = tree_store.getNodeById(selec_record[leni].get("id"));//左边主树获取节点
-					    	tmpNode.remove();												   //左边主树移除节点
+					    	if(tmpNode!=null) tmpNode.remove();												   //左边主树移除节点
 					    	if(leni==len-1){
 					    		id+=selec_record[leni].get("id");
 					    	}else{
 					    	 	id+=selec_record[leni].get("id")+",";
 					    	}
 					    }
+					    alert(123);
 					    Ext.Ajax.request({
-					    	url:fullpath+'/systemextend/UserZoneAction!deleteUserZone.do',
+					    	url:fullpath+'/userZoneController.do?deleteUserZone',
 					    	success:function(_response,_options){
 					        	Ext.Msg.alert('信息','删除成功');
-					           	grid_store.loadPage(1,{params : {start : 0,limit : pageSize}});
+					           	grid_store.loadPage(1,{params : {start : 0,limit : pageSize}});//grid刷新
+								Ext.getCmp("parentcode").store.load({params:{zonecode:-1}});//下拉树刷新
 					           	//tree_store.load();
 		 					},
 						   	failure: function() {
@@ -252,7 +256,7 @@ Ext.onReady(function(){
 	}
 	
 	topBar.add({
-		xtype : 'label',text : '区域名称:'
+		xtype : 'label',text : '区域名称:',width : 60
 	});
 	topBar.add({
 		xtype : 'textfield',width : 100,id : 'keyword2'

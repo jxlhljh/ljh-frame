@@ -1,5 +1,5 @@
 //*******公共函数************************************************************************
-var functionid,store,datagrid,storeOper,opergrid;//（全局变量）模块ID
+var functionid,store,datagrid,storeOper,opergrid,clickleafid=-1;	//（全局变量）模块ID
 function showButton(value){		//"操作"列字段的显示按钮
 	if(value=='on') return "<a href='#' onclick='showEast();'>设置按钮</a>";
 }
@@ -40,6 +40,8 @@ var store=new Ext.data.JsonStore({
     	}
 	}
 });
+
+
 var sm=Ext.create("Ext.selection.CheckboxModel",{allowDeselect:true});  
 var rownumberer= {xtype:'rownumberer',text: "",width: 2, sortable: false } ;
 
@@ -231,8 +233,7 @@ Ext.onReady(function() {
     
     
     
-	//****左边-模块信息（树）********
-	var clickleafid=-1;	 
+	//****左边-模块信息（树）******** 
 	var tree_store = Ext.create('Ext.data.TreeStore', {
         proxy: {
             type: 'ajax',
@@ -290,6 +291,11 @@ Ext.onReady(function() {
         displayMsg:'显示第 {0}  条 到 {1} 条记录，一共{2}条 ',
         emptyMsg:"没有记录"
 	});
+  	
+	store.on("beforeload",function(){
+	    Ext.apply(store.proxy.extraParams, {clickleafid:clickleafid});
+	});
+
   	//模块管理-增改（widow+form）
   	var addform =  Ext.widget('form', {
 		id:'addform',

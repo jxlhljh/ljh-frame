@@ -27,6 +27,7 @@ public class SysRoleOperationService extends CommonService<SysRoleOperation>{
 				String sql = "select operationcode,operationname,functionid,'"+useroleid+"' roleid," +
 						"ifnull((select ROp.operationcode from sys_role_operation ROp where functionid ='"+functionid+"' and roleid='"+useroleid+"'),'') auth " +
 						"from sys_operation where functionid = '"+functionid+"'";
+				System.out.println(sql);
 				super.jdbcTemplate.query(sql, new RowCallbackHandler() {
 					public void processRow(ResultSet rs) throws SQLException {
 						HashMap rowData = new HashMap();  
@@ -47,6 +48,9 @@ public class SysRoleOperationService extends CommonService<SysRoleOperation>{
 			System.out.println("saveRoleOperation");
 			String msg = "";
 			try{
+				String sql_delete = "delete from sys_role_operation " +
+						"where functionid='"+sysRoleOperation.getFunctionid()+"' and roleid='"+sysRoleOperation.getRoleid()+"'";
+				super.jdbcTemplate.update(sql_delete);
 				super.save(sysRoleOperation);
 			}catch(Exception e){
 				msg = "catch exception";
