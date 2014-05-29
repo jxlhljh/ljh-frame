@@ -1,0 +1,11 @@
+.connectok{
+background: url(/tetramn/page/overview/connecting.gif) no-repeat !important;
+}
+.connectbad{
+background: url(/tetramn/page/overview/connectlost.gif) no-repeat !important;
+}
+ a {
+  color:#000000;
+  text-decoration:none;
+}
+ 
