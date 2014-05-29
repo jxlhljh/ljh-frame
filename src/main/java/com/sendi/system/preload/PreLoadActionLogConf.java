@@ -17,6 +17,7 @@ public class PreLoadActionLogConf extends PreloadI
 	private Log logger=LogFactory.getLog(PreLoadActionLogConf.class);
 	private HashMap<String, SysActionLogConfBean> hash=null;
 	
+	@Override
 	public void doLoad()	{
 		hash=new HashMap<String, SysActionLogConfBean>();
 		

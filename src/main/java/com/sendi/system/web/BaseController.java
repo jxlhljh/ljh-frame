@@ -69,7 +69,6 @@ public abstract class BaseController {
 		{
 			String start = request.getParameter(START);
 			String limit = request.getParameter(LIMIT);
-			
 			this.sortObjectList(array,request);			
 	        response.setContentType("text/html");
 	        response.setCharacterEncoding("UTF-8");

@@ -109,7 +109,6 @@ public class SysPowerService extends CommonService<SystemPower>{
 				psd.setInt(1,useroleid);
 		 		psd.setInt(2,Integer.parseInt((String)o[0]));
 		 		psd.setString(3,(String)o[1]);
-				psd.addBatch();
 			}
 			
 			public int getBatchSize() {

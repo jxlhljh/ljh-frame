@@ -207,6 +207,7 @@ public class FunctionModuleService extends CommonService<Functionmoudle>{
 		List<Functionmoudle> datas=null;
 		String hql="from  Functionmoudle where parentid="+clickleafid;
 		datas = findByQueryString(hql);
+		System.out.println(datas.size());
 		return datas;
 	}
 	
