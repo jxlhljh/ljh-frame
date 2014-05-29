@@ -17,13 +17,11 @@ public class PreLoadActionLogConf extends PreloadI
 	private Log logger=LogFactory.getLog(PreLoadActionLogConf.class);
 	private HashMap<String, SysActionLogConfBean> hash=null;
 	
-	@Override
 	public void doLoad()	{
 		hash=new HashMap<String, SysActionLogConfBean>();
 		
 		String sql="select * from sys_actionlog_conf where flag=1";
 		this.getJdbcTemplate().query(sql, new RowCallbackHandler() {
-			@Override
 			public void processRow(ResultSet rs) throws SQLException {
 				SysActionLogConfBean bean=new SysActionLogConfBean();
 				bean.setActionDesc(rs.getString("actionDesc"));

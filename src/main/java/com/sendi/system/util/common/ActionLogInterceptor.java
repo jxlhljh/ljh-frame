@@ -35,14 +35,12 @@ public class ActionLogInterceptor implements HandlerInterceptor{
 	@Autowired
 	private SysLogHelper sysLogHelper;
 	
-	@Override
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response,
 			Object handler) throws Exception {
 		startTime = DateUtil.getDateTime(new Date());
 		return true;
 	}
 
-	@Override
 	public void postHandle(HttpServletRequest request, HttpServletResponse response,
 			Object handler, ModelAndView modelAndView) throws Exception {
 	}
@@ -50,7 +48,6 @@ public class ActionLogInterceptor implements HandlerInterceptor{
 	/**
 	 * 在sys_actionlog_conf表中如果配置了操作的跟踪，加入日志内容
 	 */
-	@Override
 	public void afterCompletion(HttpServletRequest request,
 			HttpServletResponse response, Object handler, Exception ex)
 			throws Exception {
