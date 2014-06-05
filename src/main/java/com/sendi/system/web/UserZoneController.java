@@ -62,7 +62,7 @@ public class UserZoneController extends BaseController{
 	public void addUserrole(HttpServletRequest request,HttpServletResponse response,UserZone userZone) throws Exception {
 		try {
 			String msg = userZoneService.addUserZone(userZone);
-			if(msg.length()==0)
+			if(StringUtils.isEmpty(msg))
 				this.writeResponseText("{success:true,msg:'新增成功'}", response);
 			else
 				this.writeResponseText("{success:false,msg:'"+ msg +"'}", response);
@@ -86,7 +86,7 @@ public class UserZoneController extends BaseController{
 			else
 				this.writeResponseText("{success:false,msg:'"+ msg +"'}", response);
 		} catch (Exception e) {
-			this.writeResponseText("{success:false,msg:'程序错误'}", response);
+			this.writeResponseText("{success:false,msg:'操作失败'}", response);
 			e.printStackTrace();
 		}
 	}
@@ -97,16 +97,15 @@ public class UserZoneController extends BaseController{
 	@RequestMapping(params = "deleteUserZone")
 	public void deleteUserZone(HttpServletRequest request,HttpServletResponse response,String id) throws Exception {
 		try {
-			
 			if(StringUtils.isEmpty(id)) 
 				throw new RuntimeException("没有找到要删除的记录");
 			String msg = userZoneService.deleteUserZone(id);
-			if(msg.length()==0)
+			if(StringUtils.isEmpty(msg))
 				super.writeResponseText("{success:true,msg:'新增成功'}", response);
 			else
 				super.writeResponseText("{success:false,msg:'"+ msg +"'}", response);
 		} catch (Exception e) {
-			super.writeResponseText("{success:false,msg:'程序错误'}", response);
+			super.writeResponseText("{success:false,msg:'操作失败'}", response);
 			e.printStackTrace();
 		}
 	}

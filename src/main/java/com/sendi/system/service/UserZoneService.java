@@ -13,10 +13,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.sendi.system.bean.ApplicationContextHelper;
+import com.sendi.system.entity.UserRole;
 import com.sendi.system.entity.UserZone;
 import com.sendi.system.entity.UserZonePower;
+import com.sun.org.apache.bcel.internal.generic.RETURN;
 
 /**
  * 用户管理类
@@ -40,20 +43,18 @@ public class UserZoneService extends CommonService<UserZone> {
 	public String listUserZoneTree(HttpServletRequest request,HttpServletResponse response,Integer zonecode){
 		String homeImg = request.getContextPath()+"/icons/home_page_icon/home.gif";
     	String leafImg = request.getContextPath()+"/icons/home_page_icon/leaf.png";
-		StringBuffer jsonString = new StringBuffer("[");
+		StringBuffer jsonS = new StringBuffer("[");
 		String hql = "from UserZone where parentcode ='"+zonecode+"'";
 	    List<UserZone> zones = getSession().createQuery(hql).list();
 		for(int i=0;i<zones.size();i++){
 			UserZone zone = zones.get(i);
 			boolean isLeaf = "2".equals(zone.getLevel());
 			String icons = isLeaf?leafImg:homeImg;
-			jsonString.append("{id:'"+zone.getId()+"',text:'"+zone.getZonename()+"',leaf:"+isLeaf+",iconcls:'',icon:'"+icons+"'},");
+			jsonS.append("{id:'"+zone.getId()+"',text:'"+zone.getZonename()+"',leaf:"+isLeaf+",iconcls:'',icon:'"+icons+"'},");
 		}
-		if(jsonString.toString().endsWith(",")){
-			jsonString.deleteCharAt(jsonString.length()-1);
-    	}
-		jsonString.append("]");
-	    return jsonString.toString();
+		if(jsonS.toString().endsWith(",")) jsonS.deleteCharAt(jsonS.length()-1);
+		jsonS.append("]");
+	    return jsonS.toString();
 	}
 	
 	
@@ -70,83 +71,68 @@ public class UserZoneService extends CommonService<UserZone> {
 		
 	
 	//新增记录
+	@Transactional
 	public String addUserZone(UserZone userZone){
 		String msg = null;
-		try{
-			if(userZone.getParentcode()!=null) {
-				String level="1";
-				if(!userZone.getParentcode().equals("-1")) {
-					String sql_level = "select level+1 level from user_zone where id='"+userZone.getParentcode()+"'";
-					List<Map<String,Object>> result = jdbcTemplate.queryForList(sql_level);
-					level = (""+(Double)result.get(0).get("level")).substring(0,1);
-				}
-				userZone.setLevel(level);
-				super.save(userZone);
-				msg="";//msg.length()==0:保存成功
-			}else{
-				msg="信息不完整";
+		if(userZone.getParentcode()!=null) {
+			String level="1";
+			if(!userZone.getParentcode().equals("-1")) {
+				String sql_level = "select level+1 level from user_zone where id='"+userZone.getParentcode()+"'";
+				List<Map<String,Object>> result = jdbcTemplate.queryForList(sql_level);
+				level = (""+(Double)result.get(0).get("level")).substring(0,1);
 			}
-		}catch(Exception e){
-			e.printStackTrace();
-			msg = "service异常";
-		}finally{
+			userZone.setLevel(level);
+			super.save(userZone);
+			msg="";//msg.length()==0:保存成功
+		}else{
+			msg="信息不完整";
 		}
 		return msg;
 	}
 
 	//修改
+	@Transactional
 	public String updateUserZone(UserZone userZone){
 		String msg = null;
-		try{
-			if(userZone.getParentcode()!=null) {
-				String level="1";
-				if(!userZone.getParentcode().equals("-1")) {
-					String sql_level = "select level+1 level from user_zone where id='"+userZone.getParentcode()+"'";
-					List<Map<String,Object>> result = jdbcTemplate.queryForList(sql_level);
-					level = (""+(Double)result.get(0).get("level")).substring(0,1);
-				}
-				userZone.setLevel(level);
-				super.updateEntitie(userZone);
-				msg="";//msg.length()==0:保存成功
-			}else{
-				msg="信息不完整";
+		if(userZone.getParentcode()!=null) {
+			String level="1";
+			if(!userZone.getParentcode().equals("-1")) {
+				String sql_level = "select level+1 level from user_zone where id='"+userZone.getParentcode()+"'";
+				List<Map<String,Object>> result = jdbcTemplate.queryForList(sql_level);
+				level = (""+(Double)result.get(0).get("level")).substring(0,1);
 			}
-		}catch(Exception e){
-			e.printStackTrace();
-			msg = "service异常";
-		}finally{
+			userZone.setLevel(level);
+			super.updateEntitie(userZone);
+			msg="";//msg.length()==0:保存成功
+		}else{
+			msg="信息不完整";
 		}
 		return msg;
 	}
 	
 	
 	//删除
+	@Transactional
 	public String deleteUserZone(String id){
 		String msg = null;
-		try{
-			if(id!=null ) {
-				String sql_uz = "";
-				String sql_uzp = "";
-				if(id.length()>0){//id数>1
-					String sql_getIDs = "select id from user_zone where parentcode in("+id+")";
-					List<Map<String,Object>> result = jdbcTemplate.queryForList(sql_getIDs);
-					for(Map<String,Object> m:result){
-						id += ","+(Integer)m.get("id");
-					}
-					System.out.println(id);
-					sql_uz = "delete from user_zone where id in("+id+")";
-					sql_uzp = "delete from user_zone_power where id in("+id+")";
-					jdbcTemplate.update(sql_uz);
-					jdbcTemplate.update(sql_uzp);
+		if(id!=null ) {
+			String sql_uz = "";
+			String sql_uzp = "";
+			if(id.length()>0){//id数>1
+				String sql_getIDs = "select id from user_zone where parentcode in("+id+")";
+				List<Map<String,Object>> result = jdbcTemplate.queryForList(sql_getIDs);
+				for(Map<String,Object> m:result){
+					id += ","+(Integer)m.get("id");
 				}
-				msg="";//msg.length()==0:操作成功
-			}else{
-				msg="信息不完整";
+				System.out.println(id);
+				sql_uz = "delete from user_zone where id in("+id+")";
+				sql_uzp = "delete from user_zone_power where id in("+id+")";
+				jdbcTemplate.update(sql_uz);
+				jdbcTemplate.update(sql_uzp);
 			}
-		}catch(Exception e){
-			e.printStackTrace();
-			msg = "service异常";
-		}finally{
+			msg="";//msg.length()==0:操作成功
+		}else{
+			msg="信息不完整";
 		}
 		return msg;
 	}
@@ -186,56 +172,71 @@ public class UserZoneService extends CommonService<UserZone> {
 
 	
 	
-	// 生成区域权限树
+	/**
+	 *  生成区域权限树
+	 */
 	public String generateRoleZonePowerTree(String zonelevel,String useroleid, String zonecode) {
 		if(zonelevel.equals("true")){
 			return "";	//注意:末尾节点不展开查询!!!
 		}
-		String sql = "select uz.id,uz.zonecode,uz.zonename,uz.parentcode,uz.level,ifnull(uzp.powerstate,'none') powerstate from user_zone uz left join user_zone_power uzp on uzp.zoneid=uz.id " +
-				" and uzp.roleid='"+useroleid+"' where parentcode='"+zonecode+"' order by uz.level,uz.parentcode;";
-		System.out.println(sql);
-	    List<Map<String,Object>> zoneLlist = jdbcTemplate.queryForList(sql);
+		String hql = "from UserRole where id = "+useroleid;
+		UserRole thisUserole = (UserRole) getSession().createQuery(hql).list().get(0);
+		String sql_getParentZone="select uz.id,uz.zonecode,uz.zonename,uz.parentcode,uz.level,uzp.powerstate,uzp.roleid " +
+			"from user_zone uz right join user_zone_power uzp on uzp.zoneid=uz.id " +
+			"where uzp.roleid='"+thisUserole.getParentid()+"' and parentcode='"+zonecode+"' ";
+		String sql_thisZone = "select zoneid,powerstate from user_zone_power where roleid='"+useroleid+"'";
+		System.out.println(sql_getParentZone);
+		System.out.println(sql_thisZone);
+		List<Map<String,Object>> zoneLlist_thisZone  = jdbcTemplate.queryForList(sql_getParentZone);//以父角色具有权限的区域作为本角色的权限区域
+		List<Map<String,Object>> zoneLlist_thisZonePower  = jdbcTemplate.queryForList(sql_thisZone);//本角色具有权限的区域
 		StringBuffer jsons = new StringBuffer("[");
-		for(Map<String,Object> zonePowerMap :zoneLlist){
-			boolean isLeaf = ((String)zonePowerMap.get("level")).equals("2");
-			jsons.append("{'checked':'"+zonePowerMap.get("powerstate")+"','id':'"+zonePowerMap.get("id")+"','leaf':"+isLeaf+",'text':'"+zonePowerMap.get("zonename")+"','uiProvider':'Ext.ux.TreeCheckNodeUI'},");
+		for(Map<String,Object> zoneMap :zoneLlist_thisZone){
+			boolean isLeaf = ((String)zoneMap.get("level")).equals("2");
+			jsons.append("{'" );
+			jsons.append("checked':'"+checkZonePower((Integer)zoneMap.get("id"),zoneLlist_thisZonePower)
+					+ "','id':'"+zoneMap.get("id")+"','leaf':"+isLeaf+",'text':'"
+					+ zoneMap.get("zonename")+"','uiProvider':'Ext.ux.TreeCheckNodeUI'");
+			jsons.append("},");
 		}
-		if(jsons.toString().endsWith(",")){
-			jsons.deleteCharAt(jsons.length()-1);
-    	}
+		if(jsons.toString().endsWith(",")) jsons.deleteCharAt(jsons.length()-1);
 		jsons.append("]");
 	    return (jsons.toString());
 	}
 	
+	private String checkZonePower(int id,List<Map<String,Object>> zoneLlist_thisZonePower){
+		for(Map<String,Object> zonePowerMap :zoneLlist_thisZonePower){
+			if((Integer)zonePowerMap.get("zoneid")==id) return (String)zonePowerMap.get("powerstate");
+		}
+		return "none";
+	}
+	
+	/**
+	 * 保存角色的区域权限
+	 */
+	@Transactional
 	public String saveUserZonePower(String powerstring,final String useroleid){
 		String msg = "";
-		try{
-			if(powerstring!=null && useroleid!=null) {
-				final String[] powerArray = powerstring.split(",");
-				String sql_del = "delete from user_zone_power where roleid='"+useroleid+"'";
-				jdbcTemplate.update(sql_del);
-				if(powerArray[0].split("-").length>1){
-					String sql = "insert into user_zone_power (zoneid,powerstate,roleid) values (?,?,?)";
-					jdbcTemplate.batchUpdate(sql, new BatchPreparedStatementSetter() {
-						public void setValues(PreparedStatement psd, int i)throws SQLException {
-							psd.setString(1,powerArray[i].split("-")[0]);
-					 		psd.setString(2,powerArray[i].split("-")[1]);
-					 		psd.setString(3,useroleid);
-							//psd.addBatch();//不去的的话sql将被执行两次
-						}
-						public int getBatchSize() {
-							return powerArray.length;
-						}
-					});
-				}
-				msg = "{success:true,msg:'success'}";
-			}else{
-				msg = "{success:false,msg:'faild',errors:{'信息不完整'}}";
+		if(powerstring!=null && useroleid!=null) {
+			final String[] powerArray = powerstring.split(",");
+			String sql_del = "delete from user_zone_power where roleid='"+useroleid+"'";
+			jdbcTemplate.update(sql_del);
+			if(powerArray[0].split("-").length>1){
+				String sql = "insert into user_zone_power (zoneid,powerstate,roleid) values (?,?,?)";
+				jdbcTemplate.batchUpdate(sql, new BatchPreparedStatementSetter() {
+					public void setValues(PreparedStatement psd, int i)throws SQLException {
+						psd.setString(1,powerArray[i].split("-")[0]);
+				 		psd.setString(2,powerArray[i].split("-")[1]);
+				 		psd.setString(3,useroleid);
+						//psd.addBatch();//不去的的话sql将被执行两次
+					}
+					public int getBatchSize() {
+						return powerArray.length;
+					}
+				});
 			}
-		}catch(Exception e){
-			e.printStackTrace();
-			msg = "{success:false,msg:'faild',errors:{"+e.getMessage()+"}}";
-		}finally{
+			msg = "{success:true,msg:'success'}";
+		}else{
+			msg = "{success:false,msg:'faild',errors:{'信息不完整'}}";
 		}
 		return msg;
 	}

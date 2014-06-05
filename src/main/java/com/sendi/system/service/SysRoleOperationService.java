@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.sendi.system.entity.SysRoleOperation;
 
@@ -44,17 +45,15 @@ public class SysRoleOperationService extends CommonService<SysRoleOperation>{
 				return jsons.toString();
 		}
 
+		//*********保存-授权按钮***************
+		@Transactional
 		public String saveRoleOperation(SysRoleOperation sysRoleOperation) {
 			System.out.println("saveRoleOperation");
 			String msg = "";
-			try{
-				String sql_delete = "delete from sys_role_operation " +
-						"where functionid='"+sysRoleOperation.getFunctionid()+"' and roleid='"+sysRoleOperation.getRoleid()+"'";
-				super.jdbcTemplate.update(sql_delete);
-				super.save(sysRoleOperation);
-			}catch(Exception e){
-				msg = "catch exception";
-			}
+			String sql_delete = "delete from sys_role_operation " +
+					"where functionid='"+sysRoleOperation.getFunctionid()+"' and roleid='"+sysRoleOperation.getRoleid()+"'";
+			super.jdbcTemplate.update(sql_delete);
+			super.save(sysRoleOperation);
 			return msg;
 		}
 
