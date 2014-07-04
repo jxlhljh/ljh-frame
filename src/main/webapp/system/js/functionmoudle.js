@@ -29,7 +29,7 @@ function showEast(){
 
 
 var store=new Ext.data.JsonStore({
-	fields: [ 'id','moudletitle','moudleid','openurl','icon','orderid','iconcls','addshutcut','shutcuturl','isleaf'],
+	fields: [ 'id','moudletitle','moudleid','openurl','icon','orderid','iconcls','addshutcut','shutcuturl','isleaf','dependTree'],
 	pageSize:15,
 	proxy:{
 		type: 'ajax', 
@@ -281,7 +281,7 @@ Ext.onReady(function() {
         {header: "模块链接", width: 140, sortable: true, dataIndex: 'openurl'},
         {header: "图片路径", width: 110, sortable: true, dataIndex: 'icon'},
         {header: "图片样式", width: 110, sortable: true, dataIndex: 'iconcls'},
-        {header: "排序", width: 80, sortable: true, dataIndex: 'orderid'},        
+        {header: "排序", width: 80, sortable: true, dataIndex: 'orderid'},    
         {header: "操作", width: 80, sortable: true,align:'center', dataIndex: 'isleaf',renderer:showButton}        
     ];
   	var pagebar=Ext.create('Ext.toolbar.Paging',{
@@ -352,7 +352,7 @@ Ext.onReady(function() {
                 anchor:'95%'
             },{
                 xtype:'checkbox',
-                name: 'dependtree',fieldLabel: '是否依赖右树设备树',
+                name: 'dependTree',fieldLabel: '是否依赖右边设备树',
                 anchor:'95%'
             },
             {

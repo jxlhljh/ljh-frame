@@ -9,6 +9,7 @@ import java.util.List;
 
 import net.sf.json.JSONArray;
 
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Session;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
@@ -58,7 +59,7 @@ public class SysPowerService extends CommonService<SystemPower>{
 			//先试试吧，根据权限过滤 
 			HashMap<String, HashSet<String>> moudleid2roleid = (HashMap<String, HashSet<String>>)applicationContextHelper.servletContext.getAttribute(Globals.Syssendi_sys_moudleid2roleid_info);
 			HashSet<String> roleids = moudleid2roleid.get(""+f.getId());
-			if(roleids == null || !roleids.contains(""+parentRoleId)) continue ;
+			if((roleids == null || !roleids.contains(""+parentRoleId)) && !StringUtils.equals(Globals.SuperRoleID, parentRoleId)) continue ;//超级管理员直接有权限
 			
 			MoudleTreeCheckData ct=new MoudleTreeCheckData();
 			

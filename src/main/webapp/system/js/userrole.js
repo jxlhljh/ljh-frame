@@ -799,7 +799,7 @@ Ext.onReady(function(){
 				        width:300,
 				        minSize: 150,
 				        autoScroll: true,
-				        rootVisible:true,
+				        rootVisible:false,
 				        lines: true,
 				        singleExpand: false,
 				        useArrows: true,

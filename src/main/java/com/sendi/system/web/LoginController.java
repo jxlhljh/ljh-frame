@@ -81,9 +81,11 @@ public class LoginController extends BaseController{
 			
 			//2、未加载好信息直接退出
 			ServletContext sc = request.getSession().getServletContext();
-			Object mtuser = sc.getAttribute("sendi_sys_user_info");
-			Object mtrole = sc.getAttribute("sendi_sys_userRoleRelation_info");
-			Object mtpower = sc.getAttribute("sendi_sys_moudlePower_info");
+			Object mtuser = sc.getAttribute(Globals.Syssendi_sys_user_info);
+			Object mtrole = sc.getAttribute(Globals.Syssendi_sys_userRoleRelation_info);
+			Object mtpower = sc.getAttribute(Globals.sendi_sys_moudlePower_info);
+			HashMap<String,SystemPower> systemPower=(HashMap<String,SystemPower>)mtpower;
+
 		 	if(mtuser==null||mtrole==null||mtpower==null)
 		 	{
 		 		request.setAttribute("loginMSG", "用户相关信息未加载，无法登录");
@@ -93,7 +95,6 @@ public class LoginController extends BaseController{
 		 	//3、判断用户名密码
 		 	HashMap<String,User> usermap=(HashMap<String,User>)mtuser;
 			HashMap<String,UserRoleRelation> userRoleRelation=(HashMap<String,UserRoleRelation>)mtrole;
-			HashMap<String,SystemPower>      systemPower=(HashMap<String,SystemPower>)mtpower;
 			User u=usermap.get(login_username);
 			
 			if(u==null)
@@ -234,20 +235,6 @@ public class LoginController extends BaseController{
 				request.getSession().setAttribute(this.SESSION_USER_NAME, u.getUserName()+"");
 				request.getSession().setAttribute(this.SESSION_ROLE_ID, roleid+"");
 				request.getSession().setAttribute(this.SESSION_USER_ID_TABLEKEY, u.getId()+"");
-				
-				//8、查询用户的菜单权限
-				{
-				 	    HashMap<String,String> powerMap=new HashMap<String, String>();
-						Collection<SystemPower> syplist=systemPower.values();
-					    for(SystemPower o:syplist)
-					    {
-					       if(roldidsarr.get(o.getRoleid()+"")!=null)
-					       {
-					    	   powerMap.put(o.getMoudleid()+"",o.getPowerstate()); 
-					       }
-				 	    }
-				 	    request.getSession().setAttribute("userSystemPower", powerMap);
-			 	}
 				
 				//9、登录成功后通过afterLoginService.doLoad方法做一系统事情
 				afterLoginService.setUserid(u.getUserId()+"");

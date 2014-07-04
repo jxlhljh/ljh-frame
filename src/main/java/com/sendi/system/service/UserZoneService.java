@@ -213,26 +213,16 @@ public class UserZoneService extends CommonService<UserZone> {
 		StringBuffer jsons = new StringBuffer("[");
 		String hql = "from UserRole where id = "+useroleid;
 		UserRole thisUserole = (UserRole) getSession().createQuery(hql).list().get(0);
-		//if语句：查询根角色的区域权限树
-		if(thisUserole.getParentid().toString().equals("0")){
-			String sql_getParentZone="select uz.id,uz.zonecode,uz.zonename,uz.parentcode,uz.level,ifnull(uzp.powerstate,'none') powerstate from user_zone uz left join user_zone_power uzp on uzp.zoneid=uz.id " +
-				" and uzp.roleid='"+thisUserole.getId()+"' where parentcode='"+zonecode+"' ";
-			List<Map<String,Object>> zoneLlist_thisZone  = jdbcTemplate.queryForList(sql_getParentZone);//以父角色已勾选权限的区域作为本角色的权限区域
-			for(Map<String,Object> zoneMap :zoneLlist_thisZone){
-				boolean isLeaf = ((String)zoneMap.get("level")).equals("2");
-				jsons.append("{'" );
-				jsons.append("checked':'"+zoneMap.get("powerstate")
-						+ "','id':'"+zoneMap.get("id")+"','leaf':"+isLeaf+",'text':'"
-						+ zoneMap.get("zonename")+"','uiProvider':'Ext.ux.TreeCheckNodeUI'");
-				jsons.append("},");
-			}
-			if(jsons.toString().endsWith(",")) jsons.deleteCharAt(jsons.length()-1);
-			jsons.append("]");
-			return (jsons.toString());
+		
+		
+		//如果是超级管理员，就是直接有区域权限因此不需要关联user_zone_power表，因为这个表里面根本 就没有超管理员角色的授权记录
+		String sql_getParentZone = "";
+		if(StringUtils.equals(Globals.SuperRoleID, thisUserole.getParentid()+"")){
+			sql_getParentZone="select uz.id,uz.zonecode,uz.zonename,uz.parentcode,uz.level,'all' as powerstate,'' as roleid from user_zone uz where parentcode='"+zonecode+"' ";
+		}else{//普通的角色，需要关联区域权限表进行查询
+			sql_getParentZone="select uz.id,uz.zonecode,uz.zonename,uz.parentcode,uz.level,uzp.powerstate,uzp.roleid from user_zone uz right join user_zone_power uzp on uzp.zoneid=uz.id where uzp.roleid='"+thisUserole.getParentid()+"' and parentcode='"+zonecode+"' ";
 		}
-		String sql_getParentZone="select uz.id,uz.zonecode,uz.zonename,uz.parentcode,uz.level,uzp.powerstate,uzp.roleid " +
-			"from user_zone uz right join user_zone_power uzp on uzp.zoneid=uz.id " +
-			"where uzp.roleid='"+thisUserole.getParentid()+"' and parentcode='"+zonecode+"' ";
+		
 		String sql_thisZone = "select zoneid,powerstate from user_zone_power where roleid='"+useroleid+"'";
 		//System.out.println(sql_getParentZone);
 		//System.out.println(sql_thisZone);
