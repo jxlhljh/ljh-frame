@@ -222,28 +222,6 @@ Ext.onReady(function(){
 					});
             },
         pressed: true
-     }
-     ,'-',{
-        text: '关联用户',
-        enableToggle: true,
-        toggleHandler: function(){
-      			var _sm=grid.selModel;
-				if(_sm.getCount()==0)
-				{
-				    Ext.Msg.alert('信息','请选择需要关联的角色，注意只能单选');
-				    return;
-				}
-				if(sm.getCount()>1)
-				{
-				   Ext.Msg.alert('信息','每次只能关联一个角色');
-				   return ;
-				}
-				var selec_record=_sm.getSelected();
-				useroleid=selec_record.get("id");
-		       fromuserStore.reload({params:{start:0, limit:1000,querytype:'querynoselectuser',useroleid:useroleid}});
-			   touserStore.reload({params:{start:0, limit:1000,querytype:'queryselectuser',useroleid:useroleid}});
-        },
-        pressed: true
      },'-',{
         text: '关联模块权限',
         enableToggle: true,

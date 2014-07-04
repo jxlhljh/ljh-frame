@@ -1,6 +1,6 @@
 Ext.namespace("com.sendi.system.maincommon");
 
-var theSelectedDeviceTreeNode='';
+var theSelectedDeviceTreeNode;
 
  function getRootPath()
  {
@@ -14,6 +14,7 @@ var theSelectedDeviceTreeNode='';
  var rootPath=getRootPath();
  
  var firstLoad = true;
+ var powerstring = '';
   
 //系统主外框
 SystemMainFrame=Ext.extend(Ext.Viewport,{
@@ -174,9 +175,26 @@ MoudleTab=Ext.extend(Ext.TabPanel,{
  
 //子功能功能
  
-/***************左边列表******************************************/
+/***************右边设备树列表******************************************/
 MyTreePanel = Ext.extend(Ext.tree.TreePanel , {
+	zonetreeroot:null,
 	constructor:function(){
+		
+		var zonetreeLoder=	new Ext.tree.TreeLoader({
+      		 url:fullpath+'/userZoneController.do?loadRightDevTree',
+      		 uiProviders:{'col':Ext.ux.TreeCheckNodeUI}
+	        });
+		
+		zonetreeroot=new Ext.tree.AsyncTreeNode({
+	         text:'根结点',
+			 id:'-1',
+			 icon:fullpath+'/icons/home_page_icon/home.gif'
+	         });
+	         zonetreeLoder.on("beforeload", function(treeLoader, node) {
+	         zonetreeLoder.baseParams.zonecode=node.id;
+	         zonetreeLoder.baseParams.isleaf=node.leaf;
+	    },zonetreeLoder);
+	         
 		MyTreePanel.superclass.constructor.call(this , {
 		      	id: 'device-tree-panel',
 		      	title : '设备管理树',
@@ -187,105 +205,37 @@ MyTreePanel = Ext.extend(Ext.tree.TreePanel , {
 				enableDrag:false,
 				enableDD:false,
 				autoScroll : true,
-				root : new Ext.tree.AsyncTreeNode({
-				         text:'广东省',
-						 id:'-1',
-						 checked : false,
-						 expanded : true
-				       }),
-				loader : new Ext.tree.TreeLoader({
-					         dataUrl:fullpath+'/listUserZoneTree.do',
-					         listeners:{ 
-						        "beforeload":function(treeLoader,node) { 
-								 				//treeLoader.baseParams.node_id=node.id;
-								 				treeLoader.baseParams.zonecode=node.id;
-						        },
-						        "load":function(treeLoader,node) { 
-						        	var childNodes = node.childNodes;
-						        	if(node.getUI().checkbox){
-							        	for(var i=0;i<childNodes.length;i++){
-							        		if(node.getUI().checkbox.checked){
-							        			childNodes[i].getUI().checkbox.checked = true;
-							        			childNodes[i].getUI().addClass('node_checked');
-							        		}else{
-							        			childNodes[i].getUI().checkbox.checked = false;
-							        			childNodes[i].getUI().removeClass('node_checked');
-							        		}
-							        		
-							        	}
-						        	}
-						        }
-					       	}
-					})
+				root : zonetreeroot,
+				loader : zonetreeLoder
 		}) ;
 		
-		//绑定选中状态变更事件,增加化横线的效果
-		this.on('checkchange', function(node, checked) {
-				if (checked) {
-					node.getUI().addClass('node_checked');
-				} else {
-					node.getUI().removeClass('node_checked');
-				}
-
-			});
-			
-		theSelectedDeviceTreeNode=this;
-		// 为TreeNode对象添加级联父节点和子节点的方法
-		Ext.apply(Ext.tree.TreeNode.prototype, {
-					cascadeParent : this.cascadeParent,
-					cascadeChildren : this.cascadeChildren
-				});
-		// Checkbox被点击后级联父节点和子节点
-		Ext.override(Ext.tree.TreeEventModel, {
-					onCheckboxClick : Ext.tree.TreeEventModel.prototype.onCheckboxClick.createSequence(function(e, node) {
-								node.cascadeParent();
-								node.cascadeChildren();
-							})
-				});
+		theSelectedDeviceTreeNode = this;	
 	},
-	cascadeParent : function(){
-		var pn = this.parentNode;
-		//if (!pn || !this.getUI().checkbox.checked)
-			//return;
-		if (this.attributes.checked) {// 级联选中
-			pn.getUI().toggleCheck(true);
-		} else {// 级联未选中
-			var b = true;
-			if (pn!=null&&pn.hasChildNodes()) {
-				//alert(pn.childNodes.length);
-			    for (var i = 0; i < pn.childNodes.length; i++) {
-			        //alert(pn.childNodes[i].getUI().checkbox.checked);
-			    	if(pn.childNodes[i].getUI().checkbox.checked){
-			    		 b = false;
-			    	}
-			    }
-			}
-			
-			/*Ext.each(pn.childNodes, function(n) {
-						if (n.getUI().isChecked()) {
-							return b = false;
-						}
-						return true;
-					});*/
-			if (b&&pn!=null){
-				//alert(b);
-				pn.getUI().toggleCheck(false);  	
-			}
-			
-				
-		}
-		if(pn!=null)
-			pn.cascadeParent();
-	},
-	cascadeChildren : function(){
-		var ch = this.attributes.checked;
-		//if (!Ext.isBoolean(ch))
-			//return;
-		Ext.each(this.childNodes, function(n) {
-
-					n.getUI().toggleCheck(ch);
-					n.cascadeChildren();
-				});
+	getCheckedNodes:function(){
+		powerstring = '';
+		var node = zonetreeroot;
+		iteratorNode(node);
+   		return powerstring;
 	}
 }) ;
+
+function iteratorNode(node){
+	/*
+     * 迭代树节点，获取被选中的树节点
+     */
+			  if (node.childNodes)
+   	     {
+    	     Ext.each(node.childNodes, function(child) {
+               if(child.attributes.checked=='all'||child.attributes.checked=='part')
+    	   	  {
+    	   	    powerstring+=child.id+"-"+child.attributes.checked+",";
+    	   	    if(child.childNodes!=null&&child.childNodes.length>0)
+    	   	    {
+    	   	    	iteratorNode(child);
+    	   	    }
+    	   	  }
+           }, node);
+    	     	
+    	 }
+}
  

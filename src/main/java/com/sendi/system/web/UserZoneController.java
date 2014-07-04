@@ -1,22 +1,19 @@
 package com.sendi.system.web;
 
+import java.util.HashMap;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
-
 import org.apache.commons.lang.StringUtils;
+import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import com.sendi.system.entity.TreeRole;
-import com.sendi.system.entity.UserRole;
+import com.sendi.system.constants.Globals;
 import com.sendi.system.entity.UserZone;
-import com.sendi.system.service.UserRoleService;
 import com.sendi.system.service.UserZoneService;
 
 @Controller
@@ -25,6 +22,22 @@ public class UserZoneController extends BaseController{
 	
 	@Autowired
 	private UserZoneService userZoneService;
+	
+	@Autowired
+	private SessionFactory sessionFactory;
+	
+	/**
+	 * 加载右侧设备树,根据用户权限加载
+	 * @param request
+	 * @param response
+	 * @param node_id
+	 */
+	@RequestMapping(params = "loadRightDevTree")
+    public void loadRightDevTree(HttpServletRequest request,HttpServletResponse response,Integer zonecode){
+
+    	String json = userZoneService.loadRightDevTree(request);
+    	writeResponseText(json,response); 
+    }
 	
 	/**
 	 * 下拉树的子节点查询

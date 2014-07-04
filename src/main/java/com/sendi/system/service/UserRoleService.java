@@ -1,7 +1,10 @@
 package com.sendi.system.service;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -12,10 +15,13 @@ import javax.annotation.PostConstruct;
 
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.Session;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.sendi.system.bean.ApplicationContextHelper;
+import com.sendi.system.constants.Globals;
 import com.sendi.system.entity.TreeRole;
 import com.sendi.system.entity.UserRole;
 import com.sendi.system.entity.UserRoleRelation;
@@ -33,6 +39,10 @@ import com.sendi.system.entity.UserRoleRelation;
 @Service
 @Transactional(readOnly = true)
 public class UserRoleService extends CommonService<UserRole>{
+	
+	@Autowired
+	public ApplicationContextHelper applicationContextHelper;
+	
 	/*
 	 * 角色ID,对应角色名称
 	 */
@@ -152,7 +162,7 @@ public class UserRoleService extends CommonService<UserRole>{
 	public List<Map<String,Object>> findParentidCombox(String userRoleId){
 		List<Map<String,Object>> mapList = findAllMyRoles(userRoleId);
 		
-		String roleids = "";
+		String roleids = "-1,";
 		
 		for(Map<String,Object> tmp : mapList){
 			roleids += tmp.get("id")+",";
@@ -164,6 +174,26 @@ public class UserRoleService extends CommonService<UserRole>{
 		
 		return jdbcTemplate.queryForList(sql);
 	}
+	
+	/**
+	 * 新增用户或修改用户时选择所属角色时所用的下拉选择框数据
+	 */
+	public List<Map<String,Object>> findSubRoleidCombox(String userRoleId){
+		List<Map<String,Object>> mapList = findAllSubRoles(userRoleId);
+		
+		String roleids = "-1,";
+		
+		for(Map<String,Object> tmp : mapList){
+			roleids += tmp.get("id")+",";
+		}
+		
+		roleids = StringUtils.substringBeforeLast(roleids, ",");
+		
+		String sql = "select id,rolename from user_role where id in("+roleids+")";
+		
+		return jdbcTemplate.queryForList(sql);
+	}
+	
 	
 	//角色管理页面，左边树查询
 	public List<TreeRole> treeQuery(Integer parentid,String userid){
@@ -248,6 +278,43 @@ public class UserRoleService extends CommonService<UserRole>{
 	 */
 	public UserRole findById(Integer id){
 		return this.get(UserRole.class, id);
+	}
+	
+	/**
+	 * 根据userid查询roleid
+	 * @param userid
+	 * @return
+	 */
+	public Integer findRoleIdByUserId(Integer userid){
+		String sql="select roleid from user_role_relation  WHERE userid ="+userid;
+		Map<String,Object> map = jdbcTemplate.queryForMap(sql);
+		return (Integer)map.get("roleid");
+	}
+	
+   /**
+    * 需要将用户组关系删除，然后再进行重新插入,更新用户角色ID
+    */
+	public void updateUserRoleId(Integer roleid,Integer userid)
+	{
+		 String sql="delete from user_role_relation  WHERE user_role_relation.userid ="+userid;
+		 String sql2="insert into user_role_relation (roleid,userid) values ("+roleid+","+userid+")";
+		 String[] sqls = new String[]{sql,sql2};
+		 jdbcTemplate.batchUpdate(sqls);
+	}
+	
+	/**
+	 * 重载用户角色关系信息
+	 */
+	public void reloadUserRoleRelation(){
+		Session session = sessionFactory.openSession();
+		String hql6 = "from UserRoleRelation";
+		List datas6 = session.createQuery(hql6).list();
+		HashMap<String, UserRoleRelation> userRoleRelation = new HashMap<String, UserRoleRelation>();
+		for (Object o6 : datas6) {
+			UserRoleRelation slb = (UserRoleRelation) o6;
+			userRoleRelation.put(slb.getId() + "", slb);
+		}
+		applicationContextHelper.servletContext.setAttribute(Globals.Syssendi_sys_userRoleRelation_info, userRoleRelation);
 	}
 	
 	public HashMap<String, UserRole> getUserroleidtouserole() {

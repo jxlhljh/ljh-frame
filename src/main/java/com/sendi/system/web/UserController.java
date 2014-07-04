@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.sendi.system.entity.SysPushConfig;
 import com.sendi.system.entity.User;
+import com.sendi.system.service.UserRoleService;
 import com.sendi.system.service.UserService;
 
 @Controller
@@ -25,6 +26,9 @@ public class UserController extends BaseController {
 
 	@Autowired
 	private UserService userService;
+	
+	@Autowired
+	private UserRoleService userRoleService;
 
 	/**
 	 * 查询
@@ -46,7 +50,7 @@ public class UserController extends BaseController {
 	 */
 	@RequestMapping(params = "addUser")
 	public void addUser(HttpServletRequest request,
-			HttpServletResponse response, User user) {
+			HttpServletResponse response, User user,int roleid) {
 
 		try {
 			// 先进行特殊处理一下，将部分参数值设置默认值
@@ -63,7 +67,7 @@ public class UserController extends BaseController {
 			user.setIsactive("on");
 
 			// 执行插入操作
-			userService.addUser(user);
+			userService.addUser(user,roleid);
 
 			this.writeResponseText("{success:true,msg:'新增成功'}", response);
 		} catch (Exception e) {
@@ -82,6 +86,8 @@ public class UserController extends BaseController {
 		try {
 			
 			User user = userService.findById(id);
+			Integer roleid = userRoleService.findRoleIdByUserId(user.getId());//将角色ID查询出来
+			user.setRoleid(roleid);
 			
 			writeResponseText("{success:true,datas:"+JSONObject.fromObject(user).toString()+"}",response);
 	   	} catch (Exception e) {
@@ -97,7 +103,7 @@ public class UserController extends BaseController {
 	public void excuteModifyuser(HttpServletRequest request,
 			HttpServletResponse response, Integer id, String istip,
 			String userId, Integer pwdvalicity, String userName, String ip,
-			String is_share, Integer max_connect,String password,Integer maxlogincount) {
+			String is_share, Integer max_connect,String password,Integer maxlogincount,Integer roleid) {
 
 		try {
 
@@ -121,7 +127,7 @@ public class UserController extends BaseController {
 			}
 			user.setMaxlogincount(maxlogincount);
 
-			userService.excuteModifyuser(user);
+			userService.excuteModifyuser(user,roleid);
 
 			this.writeResponseText("{success:true,msg:'修改成功'}", response);
 		} catch (Exception e) {

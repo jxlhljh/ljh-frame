@@ -37,7 +37,8 @@
   var IsNewSession = ${pageContext.session.new} ;
   var userName="<%=session.getAttribute("username")%>";
   var user_id="<%=session.getAttribute("userid")%>";
-  var role_id="<%=session.getAttribute("role_id")%>";
+  var userid_tablekey="<%=session.getAttribute("userid_tablekey")%>";
+  var role_id="<%=session.getAttribute("roleid")%>";
   var fullpath="<%=basePath%>";
   var serverip="<%=serverip%>";
   var sendi_sys_config_para=<%=sys_config_string%>;

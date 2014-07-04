@@ -80,9 +80,10 @@ public class UserService extends CommonService<User> {
 	 * 新增用户
 	 */
 	@Transactional
-	public void addUser(User user){
+	public void addUser(User user,int roleid){
 		 
-		 this.save(user);
+		Integer userid = (Integer)this.save(user);
+		 userRoleService.updateUserRoleId(roleid, userid);
 		 
 		 //更新内存
 		 Object mtuser=applicationContextHelper.servletContext.getAttribute(Globals.Syssendi_sys_user_info);
@@ -91,14 +92,17 @@ public class UserService extends CommonService<User> {
 			HashMap<String,User> usermap = (HashMap<String,User>)mtuser;
 			usermap.put(user.getUserId(), user);
 		 }
+		 
+		 userRoleService.reloadUserRoleRelation();//重载用户角色关系信息
 	}
 	
 	/**
 	 * 修改用户
 	 */
 	@Transactional
-	public void excuteModifyuser(User user){
+	public void excuteModifyuser(User user,Integer roleid){
 		this.updateEntitie(user);
+		userRoleService.updateUserRoleId(roleid, user.getId());
 		
 		 //更新内存
 		Object mtuser=applicationContextHelper.servletContext.getAttribute(Globals.Syssendi_sys_user_info);
@@ -107,6 +111,8 @@ public class UserService extends CommonService<User> {
 			HashMap<String,User> usermap=(HashMap<String,User>)mtuser;
 			usermap.put(user.getUserId(), user);
 		}
+		
+		userRoleService.reloadUserRoleRelation();//重载用户角色关系信息
 	}
 	
 	/**
@@ -148,6 +154,8 @@ public class UserService extends CommonService<User> {
 				}
 			}
 		}
+		
+		userRoleService.reloadUserRoleRelation();//重载用户角色关系信息
 		
 	}
 	

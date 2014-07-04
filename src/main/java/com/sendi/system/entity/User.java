@@ -5,6 +5,8 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Transient;
+
 import org.hibernate.annotations.GenericGenerator;
 
 /**
@@ -34,6 +36,8 @@ public class User implements java.io.Serializable {
 	private String is_share;
 	private String ip;
 	private Integer max_connect;
+	
+	private int roleid;//所属角色
 	// Constructors
 
 	/** default constructor */
@@ -209,8 +213,14 @@ public class User implements java.io.Serializable {
 		this.max_connect = max_connect;
 	}
 	
-	
-	
+	@Transient
+	public int getRoleid() {
+		return roleid;
+	}
+
+	public void setRoleid(int roleid) {
+		this.roleid = roleid;
+	}
 	
 
 }

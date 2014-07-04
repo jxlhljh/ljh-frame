@@ -2,7 +2,6 @@ package com.sendi.system.service;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -10,16 +9,17 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
+import org.hibernate.Session;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.sendi.system.bean.ApplicationContextHelper;
+import com.sendi.system.bean.PreloadBeanconfig;
+import com.sendi.system.constants.Globals;
 import com.sendi.system.entity.UserRole;
 import com.sendi.system.entity.UserZone;
-import com.sendi.system.entity.UserZonePower;
-import com.sun.org.apache.bcel.internal.generic.RETURN;
 
 /**
  * 用户管理类
@@ -36,6 +36,37 @@ public class UserZoneService extends CommonService<UserZone> {
 	@Autowired
 	private UserRoleService userRoleService;
 	
+	@Autowired
+	private PreloadBeanconfig preloadBeanconfig;
+	
+	
+	/**
+	 * 右边设备树查询
+	 * @param request
+	 * @param response
+	 * @param zonecode
+	 */
+    public String loadRightDevTree(HttpServletRequest request){
+    	List<Map<String,Object>> zonePowerMap = (List<Map<String,Object>>)request.getSession().getAttribute(Globals.UserZonePowerSessionName);
+    	List<Map<String,Object>> currentUserZonePowerMap = (List<Map<String,Object>>)request.getSession().getAttribute(Globals.UserZonePowerSessionName);
+    	String zonecode = StringUtils.trimToEmpty(request.getParameter("zonecode"));
+    	
+    	StringBuffer json = new StringBuffer("[");
+    	for(Map<String,Object> m : zonePowerMap){
+    		if(StringUtils.equals((String)m.get("parentcode"), zonecode)){
+    			//currentUserZonePowerMap.add(m);
+    			boolean isleaf = StringUtils.equals(Globals.LeafLevel, (String)m.get("level"));//2表示为
+        		json.append("{'checked':'").append(m.get("powerstate")).append("','id':'").append(m.get("uzid")).append("','leaf':").append(isleaf).append(",'text':'").append(m.get("zonename")).append("','uiProvider':'Ext.ux.TreeCheckNodeUI'},");
+    		}
+    	}
+    	
+    	if(json.lastIndexOf(",")!=-1) json.deleteCharAt(json.lastIndexOf(","));
+    	
+    	json.append("]");
+    	
+    	//StringBuffer json = new StringBuffer("[{'checked':'all','id':'1','leaf':true,'text':'北京市','uiProvider':'Ext.ux.TreeCheckNodeUI'},{'checked':'all','id':'2','leaf':false,'text':'广东省','uiProvider':'Ext.ux.TreeCheckNodeUI'}]") ;
+    	return json.toString();
+    }
 	
 	/**
 	 * 下拉树的子节点查询
@@ -149,7 +180,7 @@ public class UserZoneService extends CommonService<UserZone> {
 	    List<UserZone> zones = getSession().createQuery(hql).list();
 	    jsons.append("[");
 		if(comboTreeid.equals("-1")){
-			jsons.append("{ text:'全国',id:'-1',checked: false ,leaf: false ,expanded: true ,children:[");
+			jsons.append("{ text:'"+Globals.TreeRootName+"',id:'-1',checked: false ,leaf: false ,expanded: true ,children:[");
 			for(int i=0;i<zones.size();i++){
 				UserZone zone = zones.get(i);
 				boolean isLeaf = "3".equals(zone.getLevel());
@@ -179,17 +210,34 @@ public class UserZoneService extends CommonService<UserZone> {
 		if(zonelevel.equals("true")){
 			return "";	//注意:末尾节点不展开查询!!!
 		}
+		StringBuffer jsons = new StringBuffer("[");
 		String hql = "from UserRole where id = "+useroleid;
 		UserRole thisUserole = (UserRole) getSession().createQuery(hql).list().get(0);
+		//if语句：查询根角色的区域权限树
+		if(thisUserole.getParentid().toString().equals("0")){
+			String sql_getParentZone="select uz.id,uz.zonecode,uz.zonename,uz.parentcode,uz.level,ifnull(uzp.powerstate,'none') powerstate from user_zone uz left join user_zone_power uzp on uzp.zoneid=uz.id " +
+				" and uzp.roleid='"+thisUserole.getId()+"' where parentcode='"+zonecode+"' ";
+			List<Map<String,Object>> zoneLlist_thisZone  = jdbcTemplate.queryForList(sql_getParentZone);//以父角色已勾选权限的区域作为本角色的权限区域
+			for(Map<String,Object> zoneMap :zoneLlist_thisZone){
+				boolean isLeaf = ((String)zoneMap.get("level")).equals("2");
+				jsons.append("{'" );
+				jsons.append("checked':'"+zoneMap.get("powerstate")
+						+ "','id':'"+zoneMap.get("id")+"','leaf':"+isLeaf+",'text':'"
+						+ zoneMap.get("zonename")+"','uiProvider':'Ext.ux.TreeCheckNodeUI'");
+				jsons.append("},");
+			}
+			if(jsons.toString().endsWith(",")) jsons.deleteCharAt(jsons.length()-1);
+			jsons.append("]");
+			return (jsons.toString());
+		}
 		String sql_getParentZone="select uz.id,uz.zonecode,uz.zonename,uz.parentcode,uz.level,uzp.powerstate,uzp.roleid " +
 			"from user_zone uz right join user_zone_power uzp on uzp.zoneid=uz.id " +
 			"where uzp.roleid='"+thisUserole.getParentid()+"' and parentcode='"+zonecode+"' ";
 		String sql_thisZone = "select zoneid,powerstate from user_zone_power where roleid='"+useroleid+"'";
-		System.out.println(sql_getParentZone);
-		System.out.println(sql_thisZone);
-		List<Map<String,Object>> zoneLlist_thisZone  = jdbcTemplate.queryForList(sql_getParentZone);//以父角色具有权限的区域作为本角色的权限区域
+		//System.out.println(sql_getParentZone);
+		//System.out.println(sql_thisZone);
+		List<Map<String,Object>> zoneLlist_thisZone  = jdbcTemplate.queryForList(sql_getParentZone);//以父角色已勾选权限的区域作为本角色的权限区域
 		List<Map<String,Object>> zoneLlist_thisZonePower  = jdbcTemplate.queryForList(sql_thisZone);//本角色具有权限的区域
-		StringBuffer jsons = new StringBuffer("[");
 		for(Map<String,Object> zoneMap :zoneLlist_thisZone){
 			boolean isLeaf = ((String)zoneMap.get("level")).equals("2");
 			jsons.append("{'" );
@@ -234,11 +282,22 @@ public class UserZoneService extends CommonService<UserZone> {
 					}
 				});
 			}
+			
+			//重载区域权限
+			reloadUserZonePower();
+			
 			msg = "{success:true,msg:'success'}";
 		}else{
 			msg = "{success:false,msg:'faild',errors:{'信息不完整'}}";
 		}
 		return msg;
 	}
+	
+	//重载区域权限
+	public void reloadUserZonePower()
+ 	{
+		Session session = sessionFactory.getCurrentSession();
+		preloadBeanconfig.loadUserZonePower(session);
+ 	}
 	
 }

@@ -147,4 +147,17 @@ public class UserRoleController extends BaseController{
 		
 		writeJSONArray(userRoleService.findParentidCombox(roleId), request, response);
 	}
+	
+	/**
+	 * 新增用户或修改用户时选择所属角色时所用的下拉选择框数据
+	 */
+	@RequestMapping(params = "findSubRoleidCombox")
+	public void findSubRoleidCombox(HttpServletRequest request,HttpServletResponse response){
+		
+		String roleId = getCurrentRoleId(request.getSession());
+		if(StringUtils.isEmpty(roleId)) throw new RuntimeException("未找到role,当前session已失效？");
+		
+		writeJSONArray(userRoleService.findSubRoleidCombox(roleId), request, response);
+	}
+	
 }

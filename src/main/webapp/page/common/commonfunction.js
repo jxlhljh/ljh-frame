@@ -13,11 +13,6 @@ var hasButtonPermission = function(operCode,moudleid){
 //Retrieves the device tree mian frame data
 //Support level three iframe
  function getDviceTree(){
-	  if(parent.theSelectedDeviceTreeNode != undefined){
-		  return parent.theSelectedDeviceTreeNode.getChecked();
-	  }else if(parent.parent.theSelectedDeviceTreeNode != undefined){
-		  return parent.parent.theSelectedDeviceTreeNode.getChecked();
-	  }else if(parent.parent.parent.theSelectedDeviceTreeNode != undefined){
-		  return parent.parent.parent.theSelectedDeviceTreeNode.getChecked();
-	  }
+	  
+	  alert(parent.theSelectedDeviceTreeNode.getCheckedNodes());
   }

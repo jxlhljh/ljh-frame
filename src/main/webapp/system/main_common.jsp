@@ -6,6 +6,7 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <title><%=(String)application.getAttribute("sendi_system_title")%> </title>
 <%@include file="/page/common/common.jsp"%>
+<script type="text/javascript" src="${ctx}/page/common/TreeCheckNodeUI.js"></script>
 <script type="text/javascript" src="${ctx}/system/js/mainclass_common.js"></script>
 <script type="text/javascript" src="${ctx}/system/js/push.js"></script>
 <script type="text/javascript" src="${ctx}/system/js/main_common.js"></script>

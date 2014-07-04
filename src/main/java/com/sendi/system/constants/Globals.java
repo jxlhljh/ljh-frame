@@ -27,9 +27,15 @@ public class Globals {
 	public static final String Syssendi_sys_host_address_ip="sendi_sys_host_address_ip";
 	public static final String Syssendi_sys_host_name_hostname="sendi_sys_host_name_hostname";
 	public static final String SysRoleOperations = "sys_role_operations";
+	public static final String UserZonePowerInfos = "user_zone_power_infos";
 	public static final String Scheduler = "scheduler";
 	
 	public static final String EhCacheName = "dictCache";//缓存的名称
+	public static final String SuperAdmin = "admin";//缓存的名称
+	public static final String TreeRootName = "广东省";//设备树根结点名称
+	public static final String UserZonePowerSessionName = "userZonePower";//用户区域权限名称
+	public static final String TreeRootId = "-1";//设备树根结点ID
+	public static final String LeafLevel = "2";//区域管理中哪一层为叶子结点
 	
 	//保存session中
 	public static final String SesloginInfo="loginInfo";

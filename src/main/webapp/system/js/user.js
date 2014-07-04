@@ -313,6 +313,7 @@ Ext.onReady(function(){
  	            pressed: true,
 			 handler:function()
 			 {
+				 getDviceTree();
 				 store.load({params:{start:0,limit:25}});
  
 			 }},'-',
@@ -416,6 +417,32 @@ var is_shareStore=new Ext.data.SimpleStore({
      value:'n',
      anchor:'95%'
  }); 
+ 
+ var roleidStore=new Ext.data.JsonStore({
+ 	root: 'data',
+ 	totalProperty: 'totalCount',
+ 	pruneModifiedRecords:true,//设置为true,则每次当store装载或有record被移除时,清空所有修改了的record信息. 默认为false. 
+		fields: [ 'id','rolename'],
+		url:rootPath+"/userRoleController.do?findParentidCombox",
+		baseParams:{start:0, limit:5000}
+ });	
+ 
+ var parentid=new Ext.form.ComboBox({
+		fieldLabel: '所属角色',
+		mode:'remote',//'remote'
+		allowBlank:false,
+		readOnly:true,
+		width: 100,
+		anchor:'95%',
+		store :roleidStore,
+		name:'roleidForm',
+		id:'roleidForm',
+		hiddenName:'roleid',
+		valueField : 'id',
+		displayField : 'rolename',
+		triggerAction:'all'
+	}); 
+	roleidStore.load();
 
 	   var addform={
          	usepurse:'addform', //用途,默认情况下是添加，也可以是modifyform
@@ -488,7 +515,7 @@ var is_shareStore=new Ext.data.SimpleStore({
 	              xtype:'numberfield',
 	              name: 'max_connect',fieldLabel: '最大并发连接数',  allowBlank:false,id:'max_connect',
 	              anchor:'95%'
-	          }
+	          },parentid
 	          ]
            }]
         

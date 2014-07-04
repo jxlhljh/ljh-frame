@@ -14,10 +14,14 @@ import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.sendi.system.bean.PreloadBeanconfig;
 import com.sendi.system.entity.SysRoleOperation;
 
 @Service
 public class SysRoleOperationService extends CommonService<SysRoleOperation>{
+	
+	@Autowired
+	private PreloadBeanconfig preloadBeanconfig;
 	
 		//*********查询-授权按钮***************
 		public String queryRoleOperation(String functionid,String useroleid){
@@ -54,7 +58,9 @@ public class SysRoleOperationService extends CommonService<SysRoleOperation>{
 					"where functionid='"+sysRoleOperation.getFunctionid()+"' and roleid='"+sysRoleOperation.getRoleid()+"'";
 			super.jdbcTemplate.update(sql_delete);
 			super.save(sysRoleOperation);
+			preloadBeanconfig.loadSysRoleOperations();//重载按钮按作权限
 			return msg;
 		}
+		
 
 }

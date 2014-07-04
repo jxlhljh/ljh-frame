@@ -11,8 +11,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 
-import net.sf.json.JSONArray;
-
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +26,7 @@ import com.sendi.system.entity.SysSocketInterface;
 import com.sendi.system.entity.SystemPower;
 import com.sendi.system.entity.User;
 import com.sendi.system.entity.UserRoleRelation;
+import com.sendi.system.entity.UserZonePower;
 import com.sendi.system.socket.SocketI;
 import com.sendi.system.socket.SocketSever;
 import com.sendi.system.util.tree.MoudleTreeNode;
@@ -156,57 +155,21 @@ public class PreloadBeanconfig {
 		}
 		applicationContextHelper.servletContext.setAttribute("sendi_sys_userRoleRelation_info", userRoleRelation);
 
-		String hql7 = "from SystemPower";
-		List datas7 = session.createQuery(hql7).list();
-		for (Object o7 : datas7) {
-			SystemPower slb = (SystemPower) o7;
-			systemPower.put(slb.getId() + "", slb);
-			HashSet<String> tt = moudleid2roleid.get(String.valueOf(slb.getMoudleid().toString()));
-			if (tt == null) {
-				tt = new HashSet<String>();
-				moudleid2roleid.put(String.valueOf(slb.getMoudleid().toString()), tt);
-			}
-			tt.add(String.valueOf(slb.getRoleid()));
-		}
-		applicationContextHelper.servletContext.setAttribute("sendi_sys_moudlePower_info", systemPower);
-		// 模块ID对应的所有角色id
-		applicationContextHelper.servletContext.setAttribute("sendi_sys_moudleid2roleid_info", moudleid2roleid);
+		//7、加载SystemPower信息
+		loadSystemPower(session);
 		
-		// /加载预加载类
-		String hql11 = "from SysProloadConf";
-		List datas11 = session.createQuery(hql11).list();
-		for (Object o11 : datas11) {
-			SysProloadConf slb = (SysProloadConf) o11;
-			sysPreloadMap.put(slb.getId() + "", slb);
-		}
-		applicationContextHelper.servletContext.setAttribute("sendi_sys_proload_info", sysPreloadMap);
+		//8、/加载预加载类
+		loadSysProloadConf(session);
+		
+		//9、加载区域权限
+		loadUserZonePower(session);
 		
 		session.close();
 		
 		//以下为用jdbcTemplate操作的加载代码
 		//10、加载按钮权限
-		final List<Map<String,Object>> sys_role_operations = new ArrayList<Map<String,Object>>();
-		final String sql = "select functionid,roleid,moudleid,operationcode from sys_role_operation,functionmoudle where sys_role_operation.functionid=functionmoudle.id";
-		this.jdbcTemplate.query(sql, new RowCallbackHandler(){
-			public void processRow(ResultSet rs) throws SQLException {
-				String functionid = rs.getString("functionid");
-				String roleid = rs.getString("roleid");
-				String moudleid = rs.getString("moudleid");
-				String[] operationCodes = rs.getString("operationcode").split(",");
-				for(int i=0;i<operationCodes.length;i++){
-					Map<String,Object> map = new HashMap<String,Object>();
-					map.put("operationcode", operationCodes[i]);
-					map.put("functionid", functionid);
-					map.put("roleid", roleid);
-					map.put("moudleid", moudleid);
-					sys_role_operations.add(map);
-				}
-			}	
-		});
-		applicationContextHelper.servletContext.setAttribute(Globals.SysRoleOperations, sys_role_operations);
+		loadSysRoleOperations();
 		
-		
-
 		///加载服务器地址
 		applicationContextHelper.servletContext.setAttribute("sendi_sys_host_address_ip", InetAddress.getLocalHost().getHostAddress());
 		applicationContextHelper.servletContext.setAttribute("sendi_sys_host_name_hostname", InetAddress.getLocalHost().getHostName());
@@ -229,6 +192,80 @@ public class PreloadBeanconfig {
 			 sysSocketI.put(key, c);
 	 	 }
 		
+	}
+	
+	//加载SystemPower信息
+	public void loadSystemPower(Session session){
+		String hql7 = "from SystemPower";
+		List datas7 = session.createQuery(hql7).list();
+		for (Object o7 : datas7) {
+			SystemPower slb = (SystemPower) o7;
+			systemPower.put(slb.getId() + "", slb);
+			HashSet<String> tt = moudleid2roleid.get(String.valueOf(slb.getMoudleid().toString()));
+			if (tt == null) {
+				tt = new HashSet<String>();
+				moudleid2roleid.put(String.valueOf(slb.getMoudleid().toString()), tt);
+			}
+			tt.add(String.valueOf(slb.getRoleid()));
+		}
+		applicationContextHelper.servletContext.setAttribute("sendi_sys_moudlePower_info", systemPower);
+		// 模块ID对应的所有角色id
+		applicationContextHelper.servletContext.setAttribute("sendi_sys_moudleid2roleid_info", moudleid2roleid);
+	}
+	
+	//8、/加载预加载类
+	public void loadSysProloadConf(Session session){
+		String hql8 = "from SysProloadConf";
+		List datas8 = session.createQuery(hql8).list();
+		for (Object o8 : datas8) {
+			SysProloadConf slb = (SysProloadConf) o8;
+			sysPreloadMap.put(slb.getId() + "", slb);
+		}
+		applicationContextHelper.servletContext.setAttribute("sendi_sys_proload_info", sysPreloadMap);
+	}
+	
+	//9、加载区域权限
+	public void loadUserZonePower(Session session){
+		final List<Map<String,Object>> userZonePower = new ArrayList<Map<String,Object>>();
+		final String sql = "select user_zone.id as uzid,user_zone_power.id as uzpid,zonecode,zonename,parentcode,level,powerstate,roleid from user_zone,user_zone_power where user_zone.id=user_zone_power.zoneid";
+		this.jdbcTemplate.query(sql, new RowCallbackHandler(){
+			public void processRow(ResultSet rs) throws SQLException {
+				Map<String,Object> map = new HashMap<String,Object>();
+				map.put("uzid", rs.getString("uzid"));
+				map.put("uzpid", rs.getString("uzpid"));
+				map.put("zonecode", rs.getString("zonecode"));
+				map.put("zonename", rs.getString("zonename"));
+				map.put("parentcode", rs.getString("parentcode"));
+				map.put("level", rs.getString("level"));
+				map.put("powerstate", rs.getString("powerstate"));
+				map.put("roleid", rs.getString("roleid"));
+				userZonePower.add(map);
+			}	
+		});
+		applicationContextHelper.servletContext.setAttribute(Globals.UserZonePowerInfos, userZonePower);
+	}
+	
+	//10、加载按钮权限
+	public void loadSysRoleOperations(){
+		final List<Map<String,Object>> sys_role_operations = new ArrayList<Map<String,Object>>();
+		final String sql = "select functionid,roleid,moudleid,operationcode from sys_role_operation,functionmoudle where sys_role_operation.functionid=functionmoudle.id";
+		this.jdbcTemplate.query(sql, new RowCallbackHandler(){
+			public void processRow(ResultSet rs) throws SQLException {
+				String functionid = rs.getString("functionid");
+				String roleid = rs.getString("roleid");
+				String moudleid = rs.getString("moudleid");
+				String[] operationCodes = rs.getString("operationcode").split(",");
+				for(int i=0;i<operationCodes.length;i++){
+					Map<String,Object> map = new HashMap<String,Object>();
+					map.put("operationcode", operationCodes[i]);
+					map.put("functionid", functionid);
+					map.put("roleid", roleid);
+					map.put("moudleid", moudleid);
+					sys_role_operations.add(map);
+				}
+			}	
+		});
+		applicationContextHelper.servletContext.setAttribute(Globals.SysRoleOperations, sys_role_operations);
 	}
 	
 	public void executePreloadBean() {

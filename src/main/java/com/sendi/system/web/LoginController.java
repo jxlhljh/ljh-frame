@@ -2,10 +2,12 @@ package com.sendi.system.web;
 
 import java.net.Socket;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -24,6 +26,7 @@ import com.sendi.system.entity.SystemPower;
 import com.sendi.system.entity.User;
 import com.sendi.system.entity.UserRole;
 import com.sendi.system.entity.UserRoleRelation;
+import com.sendi.system.service.AfterLoginService;
 import com.sendi.system.service.UserRoleService;
 import com.sendi.system.socket.SocketSever;
 import com.sendi.system.util.common.DateUtil;
@@ -51,7 +54,10 @@ public class LoginController extends BaseController{
 	
 	@Autowired
 	private OnlineUser onlineUser;
-
+	
+	@Autowired
+	private AfterLoginService afterLoginService;
+	
 	/**
 	 * 登录
 	 */
@@ -103,7 +109,7 @@ public class LoginController extends BaseController{
 					request.setAttribute("loginMSG", "密码不正确");
 					return new ModelAndView(LOGIN_);
 				}
-				if(u.getIsactive().equals("off")&&!u.getUserId().equals("admin")) //系统管理员不能禁用
+				if(u.getIsactive().equals("off")&&!u.getUserId().equals(Globals.SuperAdmin)) //系统管理员不能禁用
 				{
 					this.sysLogHelper.Log(login_username, request.getRemoteAddr(), "fail", new Date().toLocaleString(),"user:"+login_username+"login to system","login");
 					request.setAttribute("loginMSG", "该用户已被禁用");
@@ -111,7 +117,7 @@ public class LoginController extends BaseController{
 			 	}
 				
 				//判断密码是否已过有限期2010 07 22 超级管理员不需要提示
-				if(u.getIstip().equals("on")&&!u.getUserId().equals("admin"))
+				if(u.getIstip().equals("on")&&!u.getUserId().equals(Globals.SuperAdmin))
 				{
 					SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd HH:mm");
 				    Date  d=sdf.parse(u.getPwddate());
@@ -242,6 +248,12 @@ public class LoginController extends BaseController{
 				 	    }
 				 	    request.getSession().setAttribute("userSystemPower", powerMap);
 			 	}
+				
+				//9、登录成功后通过afterLoginService.doLoad方法做一系统事情
+				afterLoginService.setUserid(u.getUserId()+"");
+				afterLoginService.setRoleid(roleid+"");
+				afterLoginService.setRequest(request);
+				afterLoginService.doLoad();
 				
 				this.sysLogHelper.Log(login_username, request.getRemoteAddr(), "success", new Date().toLocaleString(),"login to system","login");
 				return new ModelAndView("system/main_common");
