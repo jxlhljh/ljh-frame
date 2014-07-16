@@ -380,6 +380,15 @@
 					<server>tomcat6</server>
 				</configuration>
 			</plugin>
+			<plugin>             
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>2.5.1</version>             
+				<configuration>
+				<source>${jdk.version}</source>
+				<target>${jdk.version}</target>
+				</configuration>
+			</plugin> 
 		</plugins>
 		<finalName>myframe</finalName>
 		<resources>
