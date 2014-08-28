@@ -1,3 +1,4 @@
+<%@page import="com.sendi.system.constants.Globals"%>
 <%@ page isELIgnored="false" %>
 <%@page import="java.util.HashMap"%>
 <%@page import="net.sf.json.JSONObject"%>
@@ -7,7 +8,8 @@
 <c:set var="ctx" value="${pageContext.request.contextPath}" />
 <%
 		String path = request.getContextPath();
-		String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+path;
+		//String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+path;
+		String basePath = request.getScheme()+"://"+request.getServerName()+":"+Globals.Port+path;
 	    String  serverip=request.getServerName();
 	    HashMap<String,String> sendi_sys_config_para;
         Object o=application.getAttribute("sendi_sys_config_para");

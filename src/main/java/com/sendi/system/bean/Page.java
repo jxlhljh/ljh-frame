@@ -17,13 +17,13 @@ public class Page<T> implements Serializable{
 	 */
 	private static final long serialVersionUID = 1L;
 	private Integer totalCount;
-	private List<T> data;
+	private List<T> datas;
 
 	public Page(){}
 	
-	public Page(Integer totalCount,List<T> data){
+	public Page(Integer totalCount,List<T> datas){
 		this.totalCount = totalCount;
-		this.data = data;
+		this.datas = datas;
 	}
 	
 	
@@ -36,18 +36,16 @@ public class Page<T> implements Serializable{
 		this.totalCount = totalCount;
 	}
 
-
-	public List<T> getData() {
-		return data;
+	public List<T> getDatas() {
+		return datas;
 	}
 
-
-	public void setData(List<T> data) {
-		this.data = data;
+	public void setDatas(List<T> datas) {
+		this.datas = datas;
 	}
 
 	public String formToJson(){
-		String json = "{'totalCount':"+this.totalCount+",'data':"+JSONArray.fromObject(data)+"}";
+		String json = "{'totalCount':"+this.totalCount+",'datas':"+JSONArray.fromObject(datas)+"}";
 		return json;
 	}
 }

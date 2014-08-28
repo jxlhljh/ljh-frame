@@ -8,7 +8,7 @@
 			type: 'ajax', 
         	url: fullpath+'/sysProloadConfController.do?querysysPreloadData' ,
 			reader: { 
-           		root: 'data', 
+           		root: 'datas', 
             	totalProperty  : 'totalCount' 
        		}
 		}

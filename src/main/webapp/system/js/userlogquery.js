@@ -21,7 +21,7 @@ Ext.onReady(function(){
    ]); 	
 	//  表格数据源控件
     var store=new Ext.data.JsonStore({
-    	root: 'data',
+    	root: 'datas',
     	totalProperty: 'totalCount',
     	pruneModifiedRecords:true,//设置为true,则每次当store装载或有record被移除时,清空所有修改了的record信息. 默认为false. 
   		fields: ['id','actionId','actionName','methodId','methodName','loguser','clientIp','logResult','logStarttime','logEndtime','actionDesc' ],

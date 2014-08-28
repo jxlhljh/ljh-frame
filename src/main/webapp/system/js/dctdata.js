@@ -35,7 +35,7 @@ var ismodify=false;
             ]
     );
     var store=new Ext.data.JsonStore({
-    	root: 'data',
+    	root: 'datas',
     	totalProperty: 'totalCount',
     	pruneModifiedRecords:true,//设置为true,则每次当store装载或有record被移除时,清空所有修改了的record信息. 默认为false. 
   		fields: [ 'id','dcttypenote','dcttypeen','selecttype','selectsql','displayname','valuename','displayvalue','valuetext','otherfieldname','otherfieldvalue'],
@@ -298,6 +298,7 @@ var ismodify=false;
 	   	            usepurse:'addform', //用途,默认情况下是添加，也可以是modifyform
                     id:'addform',
                     xtype:'form',
+                    fileUpload: true,
                    url:rootPath+'/dctDataController.do?addDctData',
                    layout:"column",
                    baseCls:"x-plain",

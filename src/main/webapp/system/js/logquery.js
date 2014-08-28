@@ -7,7 +7,7 @@
 			type: 'ajax', 
         	url: fullpath+'/syslogsController.do?querySyslog' ,
 			reader: { 
-           		root: 'data', 
+           		root: 'datas', 
             	totalProperty  : 'totalCount' 
        		}
 		}

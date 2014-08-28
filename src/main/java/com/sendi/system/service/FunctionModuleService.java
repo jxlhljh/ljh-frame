@@ -254,7 +254,6 @@ public class FunctionModuleService extends CommonService<Functionmoudle>{
 			 
 	 	}
 		   String jsons = JSONArray.fromObject(children).toString();
-		   logger.info(jsons);
 	   return jsons;
 	}
 	

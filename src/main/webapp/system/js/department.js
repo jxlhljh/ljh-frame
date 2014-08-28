@@ -89,7 +89,7 @@ Ext.onReady(function(){
             ]
     );
     var store=new Ext.data.JsonStore({
-    	root: 'data',
+    	root: 'datas',
     	totalProperty: 'totalCount',
     	pruneModifiedRecords:true,//设置为true,则每次当store装载或有record被移除时,清空所有修改了的record信息. 默认为false. 
   		fields: [ 'id','departname','departcode','departtype','departstatus','departarea'],
@@ -263,7 +263,7 @@ Ext.onReady(function(){
                       ///////////////////
               var dptid;
               var fromuserStore=new Ext.data.JsonStore({
-							    	root: 'data',
+							    	root: 'datas',
 							    	totalProperty: 'totalCount',
 							    	pruneModifiedRecords:true,//设置为true,则每次当store装载或有record被移除时,清空所有修改了的record信息. 默认为false. 
 							  		fields: [ 'userid','username'],

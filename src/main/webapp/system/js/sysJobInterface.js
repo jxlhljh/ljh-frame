@@ -8,7 +8,7 @@
 			type: 'ajax', 
         	url: fullpath+'/sysJobInterfaceController.do?querysysJobInterfaceData' ,
 			reader: { 
-           		root: 'data', 
+           		root: 'datas', 
             	totalProperty  : 'totalCount' 
        		}
 		}

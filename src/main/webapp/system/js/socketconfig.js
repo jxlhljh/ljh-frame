@@ -7,7 +7,7 @@
 			type: 'ajax', 
         	url: fullpath+'/sysSocketInterfaceController.do?queryskInterfaceData' ,
 			reader: { 
-           		root: 'data', 
+           		root: 'datas', 
             	totalProperty  : 'totalCount' 
        		}
 		}

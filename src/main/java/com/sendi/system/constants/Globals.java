@@ -1,5 +1,7 @@
 package com.sendi.system.constants;
 
+import com.sendi.system.util.ResourceUtils;
+
 /**
  * 系统中全局常量名称
  * @author liujinghua
@@ -37,6 +39,7 @@ public class Globals {
 	public static final String UserZonePowerSessionName = "userZonePower";//用户区域权限名称
 	public static final String TreeRootId = "-1";//设备树根结点ID
 	public static final String LeafLevel = "2";//区域管理中哪一层为叶子结点
+	public static final String Port = ResourceUtils.getConfigByName("tomcat_port");//全局应用端口变量
 	
 	//保存session中
 	public static final String SesloginInfo="loginInfo";

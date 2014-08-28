@@ -1,12 +1,18 @@
 package com.sendi.system.service;
 
 import java.io.Serializable;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import net.sf.json.JSONObject;
+
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Criteria;
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -59,6 +65,13 @@ public class CommonService<T> {
 	}
 
 	/**
+	 * 获取znwgxt数据库的Connection
+	 */
+	public Connection getConnection () throws SQLException, ClassNotFoundException{
+		return jdbcTemplate.getDataSource().getConnection();
+	}
+	
+	/**
 	 * 获取所有数据表
 	 * 
 	 * @return
@@ -69,6 +82,30 @@ public class CommonService<T> {
 		return metaMap.size();
 	}
 
+	/**
+	 * 获取数据,带limit分页(截取到sql最后面的“from”，复杂的sql请注意使用)
+	 * @return
+	 */
+	public String getDataLimit(String sql,String start,String limit){
+		String dataStr = "";
+		//String countSQL = "select count(*) totalCount "+sql.substring(sql.lastIndexOf("from"),sql.indexOf("order by")==-1?sql.length():sql.indexOf("order by"));
+		String countSQL = "select count(*) from ("+sql+") t";
+		String dataSQL = sql + " limit "+(StringUtils.isBlank(start)?0:start)+","+(StringUtils.isBlank(limit)?15:limit) ;
+		List<Map<String,Object>> datasList = jdbcTemplate.queryForList(dataSQL);
+		HashMap dataMap = new HashMap();
+		dataMap.put("totalCount",jdbcTemplate.queryForObject(countSQL, Integer.class));
+		dataMap.put("datas",datasList);
+		JSONObject jsons = JSONObject.fromObject(dataMap);
+		dataStr = jsons.toString();
+		return dataStr;
+	}
+	/**
+	 * @return
+	 */
+	public List<Map<String,Object>> getDataList(String sql){
+		List<Map<String,Object>> datasList = jdbcTemplate.queryForList(sql);
+		return datasList;
+	}
 	/**
 	 * 根据实体名字获取唯一记录
 	 * 
@@ -352,6 +389,24 @@ public class CommonService<T> {
 			criteria.addOrder(Order.desc("desc"));
 		}
 		return criteria;
+	}
+	
+	/**
+	 * 
+	 * hqlQuery方式分页
+	 * 
+	 * @param cq
+	 * @param isOffset
+	 * @return
+	 */
+	public Page<T> getPageList(String hql, String start, String limit){
+		int allCounts = getPageTotalCount(hql);
+		
+		Query query = getSession().createQuery(hql);
+		query.setFirstResult(Integer.valueOf(start));
+		query.setMaxResults(Integer.valueOf(limit));
+		return new Page<T>(allCounts,query.list());
+		
 	}
 	
 	/**

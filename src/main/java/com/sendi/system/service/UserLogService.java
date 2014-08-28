@@ -87,7 +87,7 @@ public class UserLogService{
 		});		
 		
 		page.setTotalCount(totalCount);
-		page.setData(list);
+		page.setDatas(list);
 		
 		return page;
 	}
