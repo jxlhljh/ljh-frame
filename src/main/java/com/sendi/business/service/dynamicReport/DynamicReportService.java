@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import com.sendi.business.utils.DynamicReportConstant;
 import com.sendi.business.utils.DynamicReportQueryParamUtil;
+import com.sendi.system.redis.Cacheable;
 import com.sendi.system.service.CommonService;
 
 @Service
@@ -58,6 +59,7 @@ public class DynamicReportService extends CommonService {
 	 * @param request 
 	 * @param response
 	 */
+	
 	public String dataQry(HttpServletRequest request) {
 		String configId=request.getParameter("configId");
 		//step.1 根据id获取该动态报表的配置参数

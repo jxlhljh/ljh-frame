@@ -223,7 +223,14 @@
 			<artifactId>ehcache-core</artifactId>
 			<version>${ehcache.version}</version>
 		</dependency>
-
+		
+		<!-- Redis -->
+		<dependency>
+			<groupId>redis.clients</groupId>
+			<artifactId>jedis</artifactId>
+			<version>2.5.2</version>
+		</dependency>
+		
 		<!-- LOGGING begin -->
 		<dependency>
 			<groupId>org.slf4j</groupId>

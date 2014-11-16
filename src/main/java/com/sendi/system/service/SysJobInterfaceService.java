@@ -19,6 +19,7 @@ import com.sendi.system.bean.Page;
 import com.sendi.system.bean.SysLogHelper;
 import com.sendi.system.constants.Globals;
 import com.sendi.system.entity.SysJobInterface;
+import com.sendi.system.redis.Cacheable;
 
 /**
  * 定时任务配置
